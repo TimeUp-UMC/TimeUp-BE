@@ -1,0 +1,236 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model auto_alarms {
+  auto_alarm_id   String                      @id @db.VarChar(255)
+  schedule_id     Int
+  wakeup_time     DateTime                    @db.DateTime(0)
+  is_active       Boolean                     @default(false)
+  is_repeating    Boolean                     @default(true)
+  repeat_interval Int?
+  repeat_count    Int?
+  created_at      DateTime                    @db.Timestamp(0)
+  is_sound        Boolean                     @default(true)
+  is_vibrating    Boolean                     @default(true)
+  sound_id        Int
+  vibration_type  auto_alarms_vibration_type?
+}
+
+model diary {
+  diary_id   Int      @id
+  user_id    Int
+  title      String   @db.VarChar(50)
+  diary_date DateTime @db.Date
+  content    String   @db.VarChar(500)
+}
+
+model my_alarms {
+  alarm_id        Int                       @id
+  user_id         Int
+  my_alarm_name   String                    @db.VarChar(50)
+  my_alarm_time   DateTime                  @db.DateTime(0)
+  is_active       Boolean                   @default(true)
+  is_repeating    Boolean                   @default(true)
+  is_vibrating    Boolean                   @default(true)
+  is_sound        Boolean                   @default(true)
+  repeat_interval Int?
+  repeat_count    Int?
+  vibration_type  my_alarms_vibration_type?
+  sound_id        Int?
+  memo            String?                   @db.VarChar(500)
+  created_at      DateTime                  @db.Timestamp(0)
+  updated_at      DateTime                  @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model recurrence_rules {
+  recurrence_id         Int                                     @id
+  schedule_id           Int
+  repeat_type           recurrence_rules_repeat_type
+  repeat_mode           recurrence_rules_repeat_mode
+  repeat_count          Int?                                    @default(1)
+  repeat_until_date     DateTime?                               @db.Date
+  monthly_repeat_option recurrence_rules_monthly_repeat_option?
+  day_of_month          Int?
+  nth_week              Int?
+  weekday               Int?
+}
+
+model remind_rules {
+  remind_id   Int @id
+  schedule_id Int
+  remind_at   Int
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model repeat_weekdays {
+  repeat_weekday_id Int  @id
+  recurrence_id     Int
+  day_of_week       Int?
+}
+
+model schedules {
+  schedule_id  Int             @id
+  user_id      Int
+  name         String          @db.VarChar(50)
+  start_date   DateTime        @db.DateTime(0)
+  end_date     DateTime        @db.DateTime(0)
+  color        schedules_color
+  place_name   String          @db.VarChar(50)
+  address      String          @db.VarChar(255)
+  memo         String?         @db.VarChar(500)
+  is_reminding Boolean         @default(false)
+  is_recurring Boolean         @default(false)
+  is_important Boolean         @default(false)
+  created_at   DateTime?       @db.Timestamp(0)
+  updated_at   DateTime?       @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model user_google_token {
+  token_id      String   @id @db.VarChar(255)
+  user_id       Int
+  access_token  String   @db.Text
+  refresh_token String   @db.Text
+  scope         String   @db.Text
+  expires_at    DateTime @db.Timestamp(0)
+}
+
+model user_preference_transport {
+  preference_id String                              @id @db.VarChar(255)
+  user_id       Int
+  transport     user_preference_transport_transport
+  priority      Int
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  user_id               Int                         @id
+  name                  String                      @db.VarChar(50)
+  email                 String                      @db.VarChar(50)
+  birth                 Int?                        @db.Year
+  job                   users_job?
+  avg_ready_time        Int?
+  duration_time         Int?
+  home_address          String?                     @db.VarChar(255)
+  work_address          String?                     @db.VarChar(255)
+  isNew                 Boolean                     @default(true)
+  alarm_check_time      DateTime                    @default(dbgenerated("'22:00:00'")) @db.Time(0)
+  created_at            DateTime?                   @db.Timestamp(0)
+  updated_at            DateTime?                   @default(now()) @db.Timestamp(0)
+  remind_is_sound       Boolean
+  remind_is_vibrating   Boolean
+  remind_sound_id       Int
+  remind_vibration_type users_remind_vibration_type
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model wakeup_alarms {
+  wakeup_alarm_id Int                           @id
+  user_id         Int
+  day             Int
+  wakeup_time     DateTime                      @db.Time(0)
+  is_active       Boolean                       @default(true)
+  is_repeating    Boolean                       @default(true)
+  is_vibrating    Boolean                       @default(true)
+  is_sound        Boolean                       @default(true)
+  repeat_interval Int?
+  repeat_count    Int?
+  sound_id        Int?
+  vibration_type  wakeup_alarms_vibration_type?
+  memo            String?                       @db.VarChar(500)
+  created_at      DateTime?                     @db.Timestamp(0)
+  updated_at      DateTime?                     @default(now()) @db.Timestamp(0)
+}
+
+model wakeup_feedbacks {
+  feedback_id   Int      @id
+  auto_alarm_id String   @db.VarChar(255)
+  user_id       Int
+  time_rating   Int
+  wakeup_rating Int
+  comment       String?  @db.VarChar(500)
+  created_at    DateTime @db.Timestamp(0)
+}
+
+enum recurrence_rules_repeat_type {
+  weekly
+  monthly
+}
+
+enum user_preference_transport_transport {
+  bus
+  subway
+  car
+  walk
+}
+
+enum recurrence_rules_repeat_mode {
+  forever
+  count
+  until
+}
+
+enum users_job {
+  // 직장인 @map("직장인")
+  // 공무원/군인 @map("공무원/군인")
+  // 자영업자 @map("자영업자")
+  // 프리랜서 @map("프리랜서")
+  // 학생 @map("학생")
+  // 무직 @map("무직")
+  // 기타 @map("기타")
+}
+
+enum schedules_color {
+  // 빨 @map("빨")
+  // 주 @map("주")
+  // 노 @map("노")
+  // 초 @map("초")
+  // 파 @map("파")
+  // 보 @map("보")
+  // 회 @map("회")
+  // 핑 @map("핑")
+}
+
+enum recurrence_rules_monthly_repeat_option {
+  day_of_month
+  nth_weekday
+}
+
+enum my_alarms_vibration_type {
+  default
+  short1
+  short2
+  long1
+  long2
+}
+
+enum auto_alarms_vibration_type {
+  default
+  short1
+  short2
+  long1
+  long2
+}
+
+enum wakeup_alarms_vibration_type {
+  default
+  short1
+  short2
+  long1
+  long2
+}
+
+enum users_remind_vibration_type {
+  default
+  short1
+  short2
+  long1
+  long2
+}
