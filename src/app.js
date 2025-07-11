@@ -1,32 +1,25 @@
 import dotenv from 'dotenv';
 import cors from 'cors';
 import express from 'express';
-<<<<<<< HEAD
 import session from 'express-session';
 import passport from 'passport';
+
 import authRoutes from './middlewares/authRouter.js';
+import usersRouter from './src/users/users.router.js'; // 사용자 라우터
+import swaggerMiddleware from './swagger/swagger.js'; // Swagger 설정
 import './auth.config.js';
-=======
-import cors from 'cors'; //누락된 import 추가
-import usersRouter from './src/users/users.router.js'; //사용자 라우터
->>>>>>> 0aa27ea (feat: 마이페이지 API 구현(개인정보, 자동 알람 시간, 피드백))
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
-// cors 미들웨어
+// 미들웨어 설정
 app.use(cors());
-// 정적 파일 제공 미들웨어
 app.use(express.static('public'));
-// json 본문 파싱 미들웨어
 app.use(express.json());
-// URL-encoded 본문 파싱 미들웨어
 app.use(express.urlencoded({ extended: true }));
-//URL-encoded 파싱
 
-<<<<<<< HEAD
 app.use(
   session({
     secret: 'secret',
@@ -37,19 +30,22 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-=======
-//라우터 연결
+// 라우터 설정
+app.use('/auth', authRoutes);
 app.use('/users', usersRouter);
 
-//기본 라우트
->>>>>>> 0aa27ea (feat: 마이페이지 API 구현(개인정보, 자동 알람 시간, 피드백))
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.use('/auth', authRoutes);
+// 서버 실행
+const startServer = async () => {
+  await swaggerMiddleware(app);
 
-//서버 실행
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+  app.listen(port, () => {
+    console.log(`TimeUp 서버 실행 중: http://localhost:${port}`);
+    console.log(`Swagger 문서: http://localhost:${port}/docs`);
+  });
+};
+
+startServer();
