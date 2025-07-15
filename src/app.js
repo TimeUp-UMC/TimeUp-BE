@@ -5,13 +5,19 @@ import session from 'express-session';
 import passport from 'passport';
 import authRoutes from './middlewares/authRouter.js';
 import './auth.config.js';
-import { responseMiddleware } from './responseMiddleware.js';
-import { AppError, NotFoundError, InternalServerError } from './errors/error.js';
+import responseMiddleware from './middlewares/responseMiddleware.js';
+import {
+  AppError,
+  NotFoundError,
+  InternalServerError,
+} from './errors/error.js';
+import { setupSwagger } from '../swagger/swagger.config.js';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT;
+setupSwagger(app);
 
 // 응답 미들웨어
 app.use(responseMiddleware);
@@ -51,14 +57,13 @@ app.use((err, req, res, next) => {
     return res.error(err, err.status);
   }
 
-  console.error("Unhandled error:", err);
+  console.error('Unhandled error:', err);
 
   // 예기치 못한 에러
-  const internalError = new InternalServerError("Internal Server Error");
+  const internalError = new InternalServerError('Internal Server Error');
   return res.error(internalError, internalError.status);
 });
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
-
