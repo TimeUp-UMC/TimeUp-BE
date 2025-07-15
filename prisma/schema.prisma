@@ -178,24 +178,24 @@ enum recurrence_rules_repeat_mode {
 }
 
 enum users_job {
-  // 직장인 @map("직장인")
-  // 공무원/군인 @map("공무원/군인")
-  // 자영업자 @map("자영업자")
-  // 프리랜서 @map("프리랜서")
-  // 학생 @map("학생")
-  // 무직 @map("무직")
-  // 기타 @map("기타")
+  worker @map("직장인")
+  public_officer @map("공무원/군인")
+  self_employed @map("자영업자")
+  freelancer @map("프리랜서")
+  student @map("학생")
+  umemployed @map("무직")
+  other @map("기타")
 }
 
 enum schedules_color {
-  // 빨 @map("빨")
-  // 주 @map("주")
-  // 노 @map("노")
-  // 초 @map("초")
-  // 파 @map("파")
-  // 보 @map("보")
-  // 회 @map("회")
-  // 핑 @map("핑")
+  red @map("red")
+  orange @map("orange")
+  yellow @map("yellow")
+  green @map("green")
+  blue @map("blue")
+  purple @map("purple")
+  gray @map("gray")
+  pink @map("pink")
 }
 
 enum recurrence_rules_monthly_repeat_option {
