@@ -1,15 +1,18 @@
 import express from 'express';
-import redis from '../config/redis.js';
-import { authenticate } from 'passport';
+import redis from '../redis.config.js';
+import passport from 'passport';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 
 const router = express.Router();
 
-router.get('/auth', authenticate('google', { scope: ['profile', 'email'] })); // 프로파일과 이메일 정보를 받는다.
+router.get(
+  '/auth',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+); // 프로파일과 이메일 정보를 받는다.
 
 router.get(
   '/auth/google/callback',
-  authenticate('google', { failureRedirect: '/' }),
+  passport.authenticate('google', { failureRedirect: '/' }),
   async (req, res) => {
     const user = req.user;
     const accessToken = generateAccessToken(user);
