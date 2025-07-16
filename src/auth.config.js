@@ -1,8 +1,6 @@
-import { PrismaClient } from './db.config.js';
+import { prisma } from './db.config.js';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-const passport = require('passport');
-
-const prisma = new PrismaClient();
+import passport from 'passport';
 
 export const googleStrategy = new GoogleStrategy(
   {
