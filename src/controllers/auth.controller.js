@@ -3,14 +3,17 @@ import { ValidationError } from '../errors/error.js';
 
 export const loginWithGoogle = async (req, res) => {
   console.log('로그인을 요청했습니다.');
-  const { access_token } = req.body;
+  const { access_token, refresh_token } = req.body;
 
   if (!access_token) {
     throw new ValidationError();
   }
 
   try {
-    const result = await authService.handleGoogleLogin(access_token);
+    const result = await authService.handleGoogleLogin({
+      googleAccessToken: access_token,
+      googleRefreshToken: refresh_token,
+    });
     res.success(result);
   } catch (err) {
     console.log('Login failed', err);

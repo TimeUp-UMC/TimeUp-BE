@@ -4,12 +4,16 @@ import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 import redis from '../redis.config.js';
 import { ValidationError } from '../errors/error.js';
 
-export const handleGoogleLogin = async (googleAccessToken) => {
+export const handleGoogleLogin = async ({
+  googleAccessToken,
+  googleRefreshToken,
+}) => {
   const googleProfile = await getGoogleUserInfo(googleAccessToken);
 
   console.log(googleProfile);
   const email = googleProfile.email;
   const name = googleProfile.name;
+  const googleId = googleProfile.sub;
 
   if (!email || !name) {
     throw new ValidationError();
@@ -23,6 +27,12 @@ export const handleGoogleLogin = async (googleAccessToken) => {
       name,
     });
   }
+
+  await userRespository.saveGoogleToken({
+    user_id: user.user_id,
+    access_token: googleAccessToken,
+    refresh_token: googleRefreshToken,
+  });
 
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);

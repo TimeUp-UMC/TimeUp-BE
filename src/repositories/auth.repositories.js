@@ -16,3 +16,22 @@ export const createUser = async ({ email, name }) => {
     },
   });
 };
+
+export const saveGoogleToken = async ({
+  user_id,
+  access_token,
+  refresh_token = '',
+}) => {
+  return await prisma.user_google_token.upsert({
+    where: { user_id },
+    update: {
+      access_token,
+      refresh_token,
+    },
+    create: {
+      user_id,
+      access_token,
+      refresh_token,
+    },
+  });
+};
