@@ -12,11 +12,13 @@ import {
   InternalServerError,
 } from './errors/error.js';
 import { setupSwagger } from '../swagger/swagger.config.js';
+import { verifyAccessToken } from './middlewares/authMiddleware.js';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT;
+const excludedPaths = ['/', '/docs', '/auth/login/google']; //토큰 인증 제외 경로
 setupSwagger(app);
 
 // 응답 미들웨어
@@ -29,16 +31,23 @@ app.use(express.static('public'));
 app.use(express.json());
 // URL-encoded 본문 파싱 미들웨어
 app.use(express.urlencoded({ extended: true }));
+// 토큰 검증 미들웨어
+app.use((req, res, next) => {
+  if (excludedPaths.includes(req.path)) {
+    return next();
+  }
+  verifyAccessToken(req, res, next);
+});
 
-app.use(
-  session({
-    secret: 'secret',
-    resave: false,
-    saveUninitialized: false,
-  })
-);
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(
+//   session({
+//     secret: 'secret',
+//     resave: false,
+//     saveUninitialized: false,
+//   })
+// );
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
