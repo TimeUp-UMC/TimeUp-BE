@@ -1,12 +1,15 @@
 import jwt from 'jsonwebtoken';
 import { UnauthorizedError } from '../errors/error.js';
 
-//req.user에서 다음과 같이 user_id 확인 가능
-//{
-//  user_id: 2,
-//  iat: ..., // 발급 시간
-//  exp: ...  // 만료 시간
-//}
+// controller 함수에서 다음과 같이 user_id를 얻으시면 됩니다.
+// const userId = req.user?.user_id;
+
+// req.user에서 user_id 확인 가능
+// {
+//   user_id: 2,
+//   iat: ..., // 발급 시간
+//   exp: ...  // 만료 시간
+// }
 
 export const verifyAccessToken = (req, res, next) => {
   try {
@@ -23,11 +26,6 @@ export const verifyAccessToken = (req, res, next) => {
     next();
   } catch (err) {
     console.error('JWT 검증 실패', err.message);
-    if (err.name === 'TokenExpiredError') {
-      return next(new UnauthorizedError('Access token expired'));
-    } else if (err.name === 'JsonWebTokenError') {
-      return next(new UnauthorizedError('Invalid access token'));
-    }
-    return next(new InternalServerError('Unexpected auth error'));
+    return next(new UnauthorizedError());
   }
 };
