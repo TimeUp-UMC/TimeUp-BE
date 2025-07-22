@@ -91,3 +91,7 @@ export const handleTokenRefresh = async (refreshToken) => {
     refreshToken: newRefreshToken,
   };
 };
+
+export const handleLogout = async (userId) => {
+  await redis.del(`refresh:${userId}`);
+};
