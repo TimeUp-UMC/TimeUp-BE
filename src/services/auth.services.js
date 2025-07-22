@@ -2,7 +2,8 @@ import * as userRespository from '../repositories/auth.repositories.js';
 import { getGoogleUserInfo } from '../utils/googleAuth.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 import redis from '../redis.config.js';
-import { ValidationError } from '../errors/error.js';
+import { NotFoundError, ValidationError } from '../errors/error.js';
+import jwt from 'jsonwebtoken';
 
 export const handleGoogleLogin = async ({
   googleAccessToken,
@@ -37,12 +38,12 @@ export const handleGoogleLogin = async ({
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
-  //   await redis.set(
-  //     `refresh:${user.user_id}`,
-  //     refreshToken,
-  //     'EX',
-  //     7 * 24 * 60 * 60
-  //   );
+  await redis.set(
+    `refresh:${user.user_id}`,
+    refreshToken,
+    'EX',
+    7 * 24 * 60 * 60
+  );
 
   return {
     accessToken,
@@ -52,5 +53,41 @@ export const handleGoogleLogin = async ({
       email: user.email,
       name: user.name,
     },
+  };
+};
+
+export const handleTokenRefresh = async (refreshToken) => {
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+  } catch (err) {
+    throw new ValidationError('Invalid refresh token');
+  }
+
+  const userId = decoded.user_id;
+  const storedToken = await redis.get(`refresh:${userId}`);
+
+  if (storedToken !== refreshToken) {
+    throw new ValidationError('Refresh token mismatch');
+  }
+
+  const user = await userRespository.findUserById(userId);
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  const newAccessToken = generateAccessToken(user);
+  const newRefreshToken = generateRefreshToken(user);
+
+  await redis.set(
+    `refresh:${user.user_id}`,
+    newRefreshToken,
+    'EX',
+    7 * 24 * 60 * 60
+  );
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
   };
 };

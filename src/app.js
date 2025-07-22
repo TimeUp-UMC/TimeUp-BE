@@ -18,7 +18,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT;
-const excludedPaths = ['/', '/docs', '/auth/login/google']; //토큰 인증 제외 경로
+const excludedPaths = ['/', '/docs', '/auth/login/google', '/auth/refresh']; //토큰 인증 제외 경로
 setupSwagger(app);
 
 // 응답 미들웨어

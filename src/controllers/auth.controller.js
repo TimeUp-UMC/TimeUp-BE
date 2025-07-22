@@ -16,7 +16,23 @@ export const loginWithGoogle = async (req, res) => {
     });
     res.success(result);
   } catch (err) {
-    console.log('Login failed', err);
+    console.log('Login failed', err.message);
     throw new ValidationError();
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    const { refresh_token } = req.body;
+
+    if (!refresh_token) {
+      return new ValidationError('Refresh Token is required.');
+    }
+
+    const result = await authService.handleTokenRefresh(refresh_token);
+    res.success(result);
+  } catch (err) {
+    console.log('Refresh failed', err.message);
+    throw new ValidationError('Invalid or expired refresh token');
   }
 };
