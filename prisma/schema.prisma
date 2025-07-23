@@ -8,7 +8,7 @@ datasource db {
 }
 
 model auto_alarms {
-  auto_alarm_id   String                      @id @db.VarChar(255)
+  auto_alarm_id   Int                         @id @default(autoincrement())
   schedule_id     Int
   wakeup_time     DateTime                    @db.DateTime(0)
   is_active       Boolean                     @default(false)
@@ -23,7 +23,7 @@ model auto_alarms {
 }
 
 model diary {
-  diary_id   Int      @id
+  diary_id   Int      @id @default(autoincrement())
   user_id    Int
   title      String   @db.VarChar(50)
   diary_date DateTime @db.Date
@@ -31,7 +31,7 @@ model diary {
 }
 
 model my_alarms {
-  alarm_id        Int                       @id
+  alarm_id        Int                       @id @default(autoincrement())
   user_id         Int
   my_alarm_name   String                    @db.VarChar(50)
   my_alarm_time   DateTime                  @db.DateTime(0)
@@ -50,7 +50,7 @@ model my_alarms {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model recurrence_rules {
-  recurrence_id         Int                                     @id
+  recurrence_id         Int                                     @id @default(autoincrement())
   schedule_id           Int
   repeat_type           recurrence_rules_repeat_type
   repeat_mode           recurrence_rules_repeat_mode
@@ -63,20 +63,20 @@ model recurrence_rules {
 }
 
 model remind_rules {
-  remind_id   Int @id
+  remind_id   Int @id @default(autoincrement())
   schedule_id Int
   remind_at   Int
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model repeat_weekdays {
-  repeat_weekday_id Int  @id
+  repeat_weekday_id Int  @id @default(autoincrement())
   recurrence_id     Int
   day_of_week       Int?
 }
 
 model schedules {
-  schedule_id  Int             @id
+  schedule_id  Int             @id @default(autoincrement())
   user_id      Int
   name         String          @db.VarChar(50)
   start_date   DateTime        @db.DateTime(0)
@@ -101,7 +101,7 @@ model user_google_token {
 }
 
 model user_preference_transport {
-  preference_id String                              @id @db.VarChar(255)
+  preference_id Int                              @id @default(autoincrement())
   user_id       Int
   transport     user_preference_transport_transport
   priority      Int
@@ -130,7 +130,7 @@ model users {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model wakeup_alarms {
-  wakeup_alarm_id Int                           @id
+  wakeup_alarm_id Int                           @id @default(autoincrement())
   user_id         Int
   day             Int
   wakeup_time     DateTime                      @db.Time(0)
@@ -148,7 +148,7 @@ model wakeup_alarms {
 }
 
 model wakeup_feedbacks {
-  feedback_id   Int      @id
+  feedback_id   Int      @id @default(autoincrement())
   auto_alarm_id String   @db.VarChar(255)
   user_id       Int
   time_rating   Int
