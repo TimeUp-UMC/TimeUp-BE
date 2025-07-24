@@ -1,4 +1,4 @@
-name: Deploy to EC2 with Docker Compose
+name: Deploy to EC2
 
 on:
   push:
@@ -10,20 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Copy project files to EC2
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "."
-          target: "~/TimeUp-BE"
-
-      - name: Run deployment commands on EC2
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Connect and Deploy to EC2
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
@@ -31,8 +22,9 @@ jobs:
           script: |
             cd ~/TimeUp-BE
 
-            # 기존 컨테이너 종료 및 정리
-            docker-compose down
+            # 최신 코드 pull
+            git pull origin main
 
-            # 최신 빌드 및 실행
+            # 도커 컴포즈로 재빌드 및 실행
+            docker-compose down
             docker-compose up -d --build
