@@ -8,6 +8,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# Prisma client 생성
+RUN npx prisma generate
+
 # 나머지 소스 복사
 COPY . .
 
