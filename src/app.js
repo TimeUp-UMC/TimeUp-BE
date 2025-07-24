@@ -3,7 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import authRoutes from './middlewares/authRouter.js';
+import authRoutes from './routers/authRouter.js';
 import './auth.config.js';
 import responseMiddleware from './middlewares/responseMiddleware.js';
 import {
