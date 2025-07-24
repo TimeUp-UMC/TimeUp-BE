@@ -1,4 +1,4 @@
-name: Deploy to EC2 with Docker
+name: Deploy to EC2 with Docker Compose
 
 on:
   push:
@@ -30,7 +30,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/TimeUp-BE
-            docker stop timeup || true
-            docker rm timeup || true
-            docker build -t timeup .
-            docker run -d --name timeup -p 3000:3000 --env-file .env timeup
+
+            # 기존 컨테이너 종료 및 정리
+            docker-compose down
+
+            # 최신 빌드 및 실행
+            docker-compose up -d --build
