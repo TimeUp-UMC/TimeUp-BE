@@ -1,21 +1,18 @@
-# Node.js 20 버전 기반
 FROM node:20
 
-# 컨테이너 내 작업 디렉토리 지정
+# 작업 디렉토리 설정
 WORKDIR /app
 
-# package.json 복사하여 의존성 설치
+# package.json, lock파일 복사 → 종속성 설치
 COPY package*.json ./
 RUN npm install
 
-# Prisma client 생성
+# Prisma Client 생성
+COPY prisma ./prisma
 RUN npx prisma generate
 
-# 나머지 소스 복사
+# 나머지 소스 복사 (마지막에)
 COPY . .
 
-# 앱에서 사용하는 포트 노출
 EXPOSE 3000
-
-# 앱 실행
 CMD ["npm", "start"]
