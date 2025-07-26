@@ -8,6 +8,7 @@ import {
   ValidationError,
 } from '../errors/error.js';
 import jwt from 'jsonwebtoken';
+import { prisma } from '../db.config.js';
 
 export const handleGoogleLogin = async ({
   googleAccessToken,
@@ -135,4 +136,57 @@ export const handleOnboarding = async (userId, data) => {
   } else {
     throw new InternalServerError('기상 시간 데이터 오류');
   }
+};
+
+export const deleteUserAccount = async (userId) => {
+  await prisma.$transaction(async (tx) => {
+    const scheduleIds = await tx.schedules.findMany({
+      where: { user_id: userId },
+      select: { schedule_id: true },
+    });
+
+    const scheduleIdList = scheduleIds.map((s) => s.schedule_id);
+
+    if (scheduleIdList.length > 0) {
+      await tx.remind_rules.deleteMany({
+        where: { schedule_id: { in: scheduleIdList } },
+      });
+
+      const recurrenceIds = await tx.recurrence_rules.findMany({
+        where: { schedule_id: { in: scheduleIdList } },
+        select: { recurrence_id: true },
+      });
+
+      const recurrenceIdList = recurrenceIds.map((r) => r.recurrence_id);
+      if (recurrenceIdList.length > 0) {
+        await tx.repeat_weekdays.deleteMany({
+          where: { recurrence_id: { in: recurrenceIdList } },
+        });
+      }
+
+      await tx.recurrence_rules.deleteMany({
+        where: { schedule_id: { in: scheduleIdList } },
+      });
+
+      await tx.auto_alarms.deleteMany({
+        where: { schedule_id: { in: scheduleIdList } },
+      });
+
+      await tx.schedules.deleteMany({
+        where: { user_id: userId },
+      });
+    }
+
+    await tx.wakeup_alarms.deleteMany({ where: { user_id: userId } });
+    await tx.my_alarms.deleteMany({ where: { user_id: userId } });
+    await tx.wakeup_feedbacks.deleteMany({ where: { user_id: userId } });
+    await tx.user_preference_transport.deleteMany({
+      where: { user_id: userId },
+    });
+    await tx.user_google_token.deleteMany({ where: { user_id: userId } });
+    await tx.diary.deleteMany({ where: { user_id: userId } });
+
+    await tx.users.deleteMany({ where: { user_id: userId } });
+    await redis.del(`refresh:${userId}`);
+  });
 };

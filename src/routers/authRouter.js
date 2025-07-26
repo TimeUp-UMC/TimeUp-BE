@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  deleteAccount,
   loginWithGoogle,
   logout,
   onboarding,
@@ -12,5 +13,6 @@ router.post('/login/google', loginWithGoogle);
 router.post('/refresh', refreshToken);
 router.post('/logout', logout);
 router.post('/onboarding', onboarding);
+router.delete('/signout', deleteAccount);
 
 export default router;

@@ -68,3 +68,15 @@ export const onboarding = async (req, res) => {
     throw new InternalServerError();
   }
 };
+
+export const deleteAccount = async (req, res) => {
+  const userId = req.user.user_id;
+
+  try {
+    await authService.deleteUserAccount(userId);
+    res.success({ message: '회원 탈퇴가 완료되었습니다.' });
+  } catch (err) {
+    console.error('회원 탈퇴 실패', err);
+    throw new InternalServerError('회원 탈퇴 실패');
+  }
+};
