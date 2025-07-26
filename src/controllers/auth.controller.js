@@ -55,3 +55,16 @@ export const logout = async (req, res) => {
     throw new InternalServerError();
   }
 };
+
+export const onboarding = async (req, res) => {
+  const userId = req.user.user_id;
+  const onboardingData = req.body;
+
+  try {
+    await authService.handleOnboarding(userId, onboardingData);
+    res.success({ message: '온보딩 완료' });
+  } catch (err) {
+    console.error('온보딩 실패', err);
+    throw new InternalServerError();
+  }
+};

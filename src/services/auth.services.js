@@ -2,7 +2,11 @@ import * as userRespository from '../repositories/auth.repositories.js';
 import { getGoogleUserInfo } from '../utils/googleAuth.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 import redis from '../redis.config.js';
-import { NotFoundError, ValidationError } from '../errors/error.js';
+import {
+  InternalServerError,
+  NotFoundError,
+  ValidationError,
+} from '../errors/error.js';
 import jwt from 'jsonwebtoken';
 
 export const handleGoogleLogin = async ({
@@ -94,4 +98,41 @@ export const handleTokenRefresh = async (refreshToken) => {
 
 export const handleLogout = async (userId) => {
   await redis.del(`refresh:${userId}`);
+};
+
+export const handleOnboarding = async (userId, data) => {
+  const {
+    birth,
+    job,
+    avg_ready_time,
+    duration_time,
+    home_address,
+    work_address,
+    preferences,
+    wakeup_time,
+  } = data;
+
+  await userRespository.updateUser(userId, {
+    birth,
+    job,
+    avg_ready_time,
+    duration_time,
+    home_address,
+    work_address,
+    isNew: false,
+  });
+
+  console.log('기상 시간 ', wakeup_time);
+
+  if (Array.isArray(preferences)) {
+    await userRespository.saveUserPreferences(userId, preferences);
+  } else {
+    throw new InternalServerError('유저 선호도 데이터 오류');
+  }
+
+  if (wakeup_time && typeof wakeup_time === 'object') {
+    await userRespository.saveWakeupAlarms(userId, wakeup_time);
+  } else {
+    throw new InternalServerError('기상 시간 데이터 오류');
+  }
 };
