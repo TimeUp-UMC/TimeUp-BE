@@ -9,15 +9,6 @@ export const createWakeUpAlarmDTO = (userId, body) => {
       is_vibrating,
       is_repeating,
     } = body;
-  
-    if (
-      userProfile.sound_id == null ||
-      userProfile.vibration_type == null ||
-      userProfile.repeat_interval == null ||
-      userProfile.repeat_count == null
-    ) {
-      throw new BusinessLogicError('알람 기본 설정을 하지 않았습니다.','A002');
-    }
 
     const now = new Date();
 
