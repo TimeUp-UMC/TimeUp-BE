@@ -10,14 +10,14 @@ export const addMyAlarmToDB = async (myalarmData) => {
 
 // 내 알람 수정 + 비활성화
 export const updateMyAlarmInDB = async (MyalarmId, myalarmData) => {
-    const updatedAlarm = await pool.my_alarms.update({
+    const updatedAlarm = await prisma.my_alarms.update({
       where: { alarm_id: MyalarmId },
       data: myalarmData,
     });
     return updatedAlarm;
 };
 export const findMyAlarmById = async (MyalarmId) => {
-  const Myalarm = await pool.my_alarms.findUnique({
+  const Myalarm = await prisma.my_alarms.findUnique({
     where: { alarm_id: MyalarmId },
   });
   return Myalarm

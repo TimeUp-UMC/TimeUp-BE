@@ -9,7 +9,7 @@ import { prisma } from "../db.config.js";
 // 내 알람 등록
 export const addMyAlarm = async (req, res, next) => {
     try {
-      // 토큰 확인
+      // 토큰 확인 및 user_id 
       const userId = req.user?.user_id;
       
       console.log('user_id:', userId)
@@ -38,10 +38,20 @@ export const addMyAlarm = async (req, res, next) => {
 // 내 알람 수정
  export const updateMyAlarm = async (req, res, next) => {
     try {
-      const tokenId = req.headers.authorization?.split(' ')[1];
+      // 토큰 확인 및 user_id 
+      const userId = req.user?.user_id;
+      
+      console.log('user_id:', userId)
   
-      if (!tokenId) throw new UnauthorizedError('발행된 토큰이 없습니다');
-    
+      // token_id로 사용자 정보 조회
+      const exsitingUser = await prisma.users.findUnique({
+        where: { user_id: userId },
+      });
+
+      if (!exsitingUser) {
+        throw new NotFoundError('사용자가 없습니다.')
+      }
+      
       // url에서 alarm_id
       const MyalarmId = parseInt(req.params.alarm_id);
 
@@ -49,7 +59,7 @@ export const addMyAlarm = async (req, res, next) => {
       if (!existingMyAlarm) throw new NotFoundError('해당 알람이 존재하지 않습니다.', '404');
       
       // DTO 생성
-      const dto = createMyDTO(req.body); // 등록과 동일
+      const dto = createMyAlarmDTO(userId, req.body); // 등록과 동일
 
       // 서비스 호출
       const updateMy = await updatedMyAlarmService(MyalarmId, dto);
