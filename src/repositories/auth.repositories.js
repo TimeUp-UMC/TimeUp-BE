@@ -73,8 +73,10 @@ export const saveWakeupAlarms = async (userId, wakeupObj) => {
     .filter((day) => wakeupObj[day])
     .map((day, idx) => {
       const [hour, minute, second] = wakeupObj[day].split(':').map(Number);
-      const wakeupTime = new Date();
-      wakeupTime.setHours(hour, minute, second || 0, 0);
+
+      const wakeupTime = new Date(
+        Date.UTC(1970, 0, 1, hour, minute, second || 0)
+      );
 
       return {
         user_id: userId,
