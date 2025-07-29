@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `users` MODIFY `user_id` INTEGER NOT NULL AUTO_INCREMENT;
