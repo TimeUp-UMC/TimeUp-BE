@@ -106,3 +106,37 @@ export const activationMyAlarm = async (req, res, next) => {
       next(error);
   }
 };
+
+// 내 알람 삭제
+export const deleteMyAlarm = async (req, res, next) => {
+  try {
+    // 토큰 확인 및 user_id 
+    const userId = req.user?.user_id;
+      
+    console.log('user_id:', userId)
+
+    // token_id로 사용자 정보 조회
+    const exsitingUser = await prisma.users.findUnique({
+      where: { user_id: userId },
+    });
+
+    if (!exsitingUser) {
+      throw new NotFoundError('사용자가 없습니다.')
+    }
+  
+    // url에서 alarm_id
+    const alarmId = parseInt(req.params.alarm_id);
+
+    const existingMyAlarm = await findMyAlarmById(alarmId);
+    if (!existingMyAlarm) throw new NotFoundError('해당 알람이 존재하지 않습니다.', '404');
+    
+    // 알람 삭제
+    const deletedAlarm = await prisma.my_alarms.delete({
+      where: { alarm_id: alarmId },
+    });
+
+    return res.success(deletedAlarm);
+  } catch (error) {
+      next(error);
+  }
+};
