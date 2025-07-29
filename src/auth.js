@@ -1,1 +1,0 @@
-import { PrismaClient } from './db.config.js';
