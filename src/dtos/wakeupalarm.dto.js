@@ -1,5 +1,3 @@
-import { BusinessLogicError } from "../errors/error.js";
-
 // 기상 알람 수정
 export const createWakeUpAlarmDTO = (userId, body) => {
     const {
@@ -29,12 +27,10 @@ export const createWakeUpAlarmDTO = (userId, body) => {
   };
 
   // 기상 알람 비활성화 
-  export const inactiveWakeUpDTO = (body) => {
-    const {
-      in_active
-    } = body
-
+  export const activeWakeUpAlarmDTO = (userId, currentState) => {
     return {
-      in_active: false
+      user_id: userId,
+      is_active: !currentState, // 호출 시마다 상태를 반전시켜 반환
+      updated_at: new Date(),
     };
   };

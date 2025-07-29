@@ -1,6 +1,6 @@
 import { createWakeUpAlarmDTO } from "../dtos/wakeupalarm.dto.js";
-import { inactiveWakeUpDTO } from "../dtos/wakeupalarm.dto.js";
-import { UnauthorizedError, NotFoundError } from "../errors/error.js";
+import { activeWakeUpAlarmDTO } from "../dtos/wakeupalarm.dto.js";
+import { NotFoundError } from "../errors/error.js";
 import { findWakeUpAlarmById } from "../repositories/wakeupalarm.repository.js"; 
 import { updatedWakeUpAlarmService } from "../services/wakeupalarm.service.js";
 import { StatusCodes } from "http-status-codes";
@@ -73,11 +73,21 @@ export const updateWakeUpAlarm = async (req, res, next) => {
 };
 
 // 기상 알람 비활성화
-export const inactivationWakeUpAlarm = async (req, res, next) => {
+export const activationWakeUpAlarm = async (req, res, next) => {
   try {
-    const tokenId = req.headers.authorization?.split(' ')[1] ?? 'test-token-1234';
+    // 토큰 확인 및 user_id 
+    const userId = req.user?.user_id;
+      
+    console.log('user_id:', userId)
 
-    if (!tokenId) throw new UnauthorizedError('발행된 토큰이 없습니다');
+    // token_id로 사용자 정보 조회
+    const exsitingUser = await prisma.users.findUnique({
+      where: { user_id: userId },
+    });
+
+    if (!exsitingUser) {
+      throw new NotFoundError('사용자가 없습니다.')
+    }
   
     // url에서 wakeup_alarm_id
     const WUalarmId = parseInt(req.params.wakeup_alarm_id);
@@ -86,7 +96,8 @@ export const inactivationWakeUpAlarm = async (req, res, next) => {
     if (!existingWakeUpAlarm) throw new NotFoundError('해당 알람이 존재하지 않습니다.', '404');
     
     // DTO 생성
-    const dto = inactiveWakeUpDTO(req.body);
+    const currentState = existingWakeUpAlarm.is_active;
+    const dto = activeWakeUpAlarmDTO(userId, currentState);
 
     // 서비스 호출
     const updateWakeUp = await updatedWakeUpAlarmService(WUalarmId, dto); // 수정과 동일
