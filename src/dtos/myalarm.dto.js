@@ -43,12 +43,10 @@ export const createMyAlarmDTO = (userId, body) => {
   };
 
 // 내 알람 비활성화
-export const inactiveMyDTO = (body) => {
-  const {
-    is_active
-  }= body
-  
+export const activeMyAlarmDTO = (userId, currentState) => {
   return {
-    is_active: false
+    user_id: userId,
+    is_active: !currentState, // 호출 시마다 상태를 반전시켜 반환
+    updated_at: new Date()
   };
 };
