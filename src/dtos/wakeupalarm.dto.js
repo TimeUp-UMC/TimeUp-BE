@@ -6,6 +6,11 @@ export const createWakeUpAlarmDTO = (userId, body) => {
       is_sound,
       is_vibrating,
       is_repeating,
+      sound_id,
+      vibration_type,
+      repeat_interval,
+      repeat_count,
+      memo
     } = body;
 
     const now = new Date();
@@ -13,15 +18,15 @@ export const createWakeUpAlarmDTO = (userId, body) => {
     return {
       user_id: userId,
       day,
-      wakeup_time: wakeTime,
       is_active: is_active ?? true,
       is_repeating: is_repeating ?? true,
       is_sound: is_sound ?? true,
       is_vibrating: is_vibrating ?? true,
-      sound_id: sound_id,
-      vibration_type: vibration_type,
-      repeat_interval: repeat_interval,
-      repeat_count: repeat_count,
+      sound_id,
+      vibration_type,
+      repeat_interval,
+      repeat_count,
+      memo,
       updated_at: now
     };
   };
