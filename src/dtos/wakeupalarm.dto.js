@@ -1,7 +1,7 @@
 // 기상 알람 수정
 export const createWakeUpAlarmDTO = (userId, body) => {
     const {
-      day,
+      wakeup_time,
       is_active,
       is_sound,
       is_vibrating,
@@ -17,7 +17,7 @@ export const createWakeUpAlarmDTO = (userId, body) => {
 
     return {
       user_id: userId,
-      day,
+      wakeup_time: wakeup_time,
       is_active: is_active ?? true,
       is_repeating: is_repeating ?? true,
       is_sound: is_sound ?? true,
