@@ -170,7 +170,6 @@ enum user_preference_transport_transport {
 }
 
 enum recurrence_rules_repeat_mode {
-  forever
   count
   until
 }
