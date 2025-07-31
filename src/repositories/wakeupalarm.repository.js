@@ -18,8 +18,16 @@ export const updateWakeUpAlarmInDB = async (WUalarmId, WakeUpalarmData) => {
   return updatedWakeUpAlarm;
 }
 export const findWakeUpAlarmById = async (WUalarmId) => {
-  const WakeUpalarm = await prisma.wakeup_alarms.findUnique({
-    where: { wakeup_alarm_id: WUalarmId },
+  const WakeUpAlarm = await prisma.wakeup_alarms.findUnique({
+    where: { wakeup_alarm_id: WUalarmId }
   });
-  return WakeUpalarm;
+  return WakeUpAlarm;
+}
+
+// 기상 알람 조회
+export const getWakeUpAlarmInDB = async (userId) => {
+  const getWakeUpAlarm = await prisma.wakeup_alarms.findMany({
+    where: { user_id: userId },
+  });
+  return getWakeUpAlarm;
 }

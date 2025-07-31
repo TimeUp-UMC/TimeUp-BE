@@ -29,3 +29,14 @@ export const activeAutoAlarmDTO = (scheduleId, currentState) => {
         is_active: !currentState, // 호출 시마다 상태를 반전시켜 반환
     }
 };
+
+// 자동 알람 조회
+export const getAutoAlarmDTO = (AutoAlarm) => {
+    const date = new Date(AutoAlarm.wakeup_time);
+
+    return {
+        user_id: AutoAlarm.user_id,
+        wakeup_time: date,
+        is_active: AutoAlarm.is_active
+    }
+};
