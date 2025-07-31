@@ -22,3 +22,11 @@ export const findMyAlarmById = async (MyalarmId) => {
   });
   return Myalarm
 };
+
+// 내 알람 조회
+export const getMyAlarmInDB = async (userId) => {
+  const myAlarm = await prisma.my_alarms.findMany({
+    where: { user_id: userId },
+  });
+  return myAlarm;
+};

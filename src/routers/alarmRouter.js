@@ -3,6 +3,7 @@ import express from "express";
 import { addMyAlarm, activationMyAlarm, updateMyAlarm, deleteMyAlarm } from "../controllers/myalarm.controller.js";
 import { activationWakeUpAlarm, updateWakeUpAlarm } from "../controllers/wakeupalarm.controller.js";
 import { activationAutoAlarm, updateAutoAlarm } from "../controllers/autoalarm.controller.js";
+import { getAllAlarm } from "../controllers/alarm.controller.js";
 
 const router = express.Router();
 
@@ -26,6 +27,8 @@ router.patch('/:alarm_id/my-active', activationMyAlarm);
 router.patch('/:auto_alarm_id/auto-active', activationAutoAlarm);
 // 내 알람 삭제 API
 router.delete('/:alarm_id/my-delete', deleteMyAlarm);
+// 알람 조회 API
+router.get('/alarmlist', getAllAlarm);
 
 
 export default router;
