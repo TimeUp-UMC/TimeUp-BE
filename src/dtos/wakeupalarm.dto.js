@@ -31,11 +31,21 @@ export const createWakeUpAlarmDTO = (userId, body) => {
     };
   };
 
-  // 기상 알람 비활성화 
-  export const activeWakeUpAlarmDTO = (userId, currentState) => {
-    return {
-      user_id: userId,
-      is_active: !currentState, // 호출 시마다 상태를 반전시켜 반환
-      updated_at: new Date(),
-    };
+// 기상 알람 비활성화 
+export const activeWakeUpAlarmDTO = (userId, currentState) => {
+  return {
+    user_id: userId,
+    is_active: !currentState, // 호출 시마다 상태를 반전시켜 반환
+    updated_at: new Date(),
   };
+};
+
+// 기상 알람 조회
+export const getWakeUpAlarmDTO = (WakeUpAlarm) => {
+  return {
+    user_id: WakeUpAlarm.userId,
+    wakeup_time: WakeUpAlarm.wakeup_time,
+    is_active: WakeUpAlarm.is_active,
+    day: WakeUpAlarm.day
+  }
+};
