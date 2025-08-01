@@ -3,7 +3,7 @@ import {
   insertRemindRule,
   insertRecurrenceRule,
   insertRepeatWeekdays
-} from '../repositories/scheduleCreate_repository.js';
+} from '../repositories/scheduleCreate.repository.js';
 
 /// 일정 등록을 처리하는 서비스 로직
 /// 1. 기본 일정 저장

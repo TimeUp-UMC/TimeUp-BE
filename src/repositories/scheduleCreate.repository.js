@@ -8,7 +8,7 @@ export const insertSchedule = async (userId, data) => {
       name: data.name,
       start_date: new Date(data.startDate),
       end_date: new Date(data.endDate),
-      color: data.color,
+      color: data.color ?? 'red',
       place_name: data.placeName,
       address: data.address,
       memo: data.memo ?? null,
