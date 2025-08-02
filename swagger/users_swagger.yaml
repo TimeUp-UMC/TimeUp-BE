@@ -1,9 +1,37 @@
 paths:
-  /users/sign-up:
-    post:
-      tags:
-        - Users
-      summary: 회원 가입 API
+  /users/me:
+    get:
+      tags: [Users]
+      summary: 사용자 개인정보 조회
+      responses:
+        '200':
+          description: 개인정보 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object  
+                properties:
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  birth:
+                    type: string
+                    format: date
+                  job:
+                    type: string
+                  avg_ready_time:
+                    type: integer
+                  duration_time:
+                    type: integer
+                  alarm_check_time:
+                    type: string
+                    format: time
+    put:
+      tags: [Users]
+      summary: 사용자 개인정보 수정
+      security:
+        -bearerAuth: []
       requestBody:
         required: true
         content:
@@ -11,72 +39,77 @@ paths:
             schema:
               type: object
               properties:
-                email:
-                  type: string
                 name:
-                  type: string
-                gender:
                   type: string
                 birth:
                   type: string
                   format: date
-                address:
+                job:
                   type: string
-                detailAddress:
+                avg_ready_time:
+                  type: integer
+                duration_time:
+                  type: integer
+                alarm_check_time:
                   type: string
-                phoneNumber:
-                  type: string
-                preferences:
-                  type: array
-                  items:
-                    type: number
+                  format: time
       responses:
         '200':
-          description: 회원 가입 성공 응답
+          description: 개인정보 수정 성공
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  resultType:
+                  message:
                     type: string
-                    example: SUCCESS
-                  error:
-                    type: object
-                    nullable: true
-                    example: null
-                  success:
-                    type: object
-                    properties:
-                      email:
-                        type: string
-                      name:
-                        type: string
-                      preferCategory:
-                        type: array
-                        items:
-                          type: string
-        '400':
-          description: 회원 가입 실패 응답
+                    example: 개인정보 수정 완료
+  /users/me/auto-alarm-check-time:
+    get:
+      tags: [Users]
+      summary: 자동 알람 확인 시간 조회
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 자동 알람 확인 시간 조회 성공
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  resultType:
+                  alarm_check_time:
                     type: string
-                    example: FAIL
-                  error:
-                    type: object
-                    properties:
-                      errorCode:
-                        type: string
-                        example: U001
-                      reason:
-                        type: string
-                      data:
-                        type: object
-                  success:
-                    type: object
-                    nullable: true
-                    example: null
+                    format: time
+    put:
+      tags: [Users]
+      summary: 자동 알람 확인 시간 수정
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alarm_check_time:
+                  type: string
+                  format: time
+      responses:
+        '200':
+          description: 자동 알람 확인 시간 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
