@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import { deleteScheduleWithRules } from '../services/scheduleDelete.service.js';
 import { AppError } from '../errors/error.js';
 

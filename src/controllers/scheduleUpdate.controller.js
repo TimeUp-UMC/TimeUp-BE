@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import { bodyToSchedule } from '../dtos/schedule.dto.js';
 import { updateScheduleWithRules } from '../services/scheduleUpdate.service.js';
 import { AppError } from '../errors/error.js';
@@ -12,7 +13,7 @@ export const handleUpdateSchedule = async (req, res, next) => {
     }
 
     const data = bodyToSchedule(req.body);
-    await updateSchedule(scheduleId, userId, data);
+    await updateScheduleWithRules(scheduleId, userId, data);
 
     res.success({
       message: '일정이 성공적으로 수정되었습니다.',

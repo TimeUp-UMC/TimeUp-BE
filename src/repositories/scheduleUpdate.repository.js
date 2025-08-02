@@ -2,12 +2,15 @@ import { prisma } from '../db.config.js';
 
 // 일정 정보 수정 (user_id까지 조건에 포함해 본인만 수정 가능하게)
 export const updateScheduleById = async (scheduleId, userId, data) => {
-  return await prisma.schedules.updateMany({
-    where: { id: scheduleId, user_id: userId },
+    const startDate = data.startDate;
+    const endDate = data.endDate;
+
+  return await prisma.schedules.update({
+    where: { schedule_id: scheduleId },
     data: {
       name: data.name,
-      start_date: new Date(data.startDate),
-      end_date: new Date(data.endDate),
+      start_date: startDate,
+      end_date: endDate,
       color: data.color,
       place_name: data.placeName,
       address: data.address,

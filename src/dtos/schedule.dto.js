@@ -36,7 +36,7 @@ export const bodyToSchedule = (body) => {
   // 날짜 타입 변환
   const start = new Date(startDate);
   const end = new Date(endDate);
-  if (isNaN(start) || isNaN(end)) {
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     throw new ValidationError('날짜 형식이 올바르지 않습니다.');
   }
 
@@ -78,8 +78,8 @@ export const bodyToSchedule = (body) => {
 
   return {
     name,
-    startDate: start,
-    endDate: end,
+    startDate: new Date(start),
+    endDate: new Date(end),
     color,
     placeName,
     address,

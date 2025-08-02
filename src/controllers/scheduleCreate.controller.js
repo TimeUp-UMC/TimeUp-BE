@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import { bodyToSchedule } from '../dtos/schedule.dto.js';
 import { createScheduleWithRules } from '../services/scheduleCreate.service.js';
 import { AppError } from '../errors/error.js';

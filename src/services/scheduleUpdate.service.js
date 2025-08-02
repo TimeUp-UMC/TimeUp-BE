@@ -11,11 +11,36 @@ import { NotFoundError } from '../errors/error.js';
 
 // 일정 수정 전체 처리 서비스
 export const updateScheduleWithRules = async (scheduleId, userId, data) => {
+  // 0. 유효성 검사
+  if (
+    !(data.startDate instanceof Date) || isNaN(data.startDate.getTime()) ||
+    !(data.endDate instanceof Date) || isNaN(data.endDate.getTime())
+  ) {
+    throw new ValidationError('startDate 또는 endDate가 유효한 날짜가 아닙니다.');
+  }
+
+  if (!data.placeName || typeof data.placeName !== 'string') {
+    throw new ValidationError('장소명이 누락되었거나 올바르지 않습니다.');
+  }
+
   // 1. 기본 일정 수정
+  console.log('[FINAL] updateScheduleById input:', {
+  name: data.name,
+  start_date: data.startDate instanceof Date ? data.startDate : new Date(data.startDate),
+  end_date: data.endDate instanceof Date ? data.endDate : new Date(data.endDate),
+  color: data.color,
+  place_name: data.placeName,
+  address: data.address,
+  memo: data.memo,
+  is_important: data.isImportant,
+  is_reminding: data.isReminding,
+  is_recurring: data.isRecurring,
+});
+
   const result = await updateScheduleById(scheduleId, userId, {
     name: data.name,
-    start_date: data.startDate,
-    end_date: data.endDate,
+    start_date: new Date(data.startDate),
+    end_date: new Date(data.endDate),
     color: data.color,
     place_name: data.placeName,
     address: data.address,
