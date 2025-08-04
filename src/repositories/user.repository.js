@@ -37,10 +37,11 @@ export const updateAlarmCheckTime = (userId, alarm_check_time) => {
   });
 };
 
-export const createAlarmFeedback = (userId, time_rating, wakeup_rating, comment) => {
+export const createAlarmFeedback = (userId, auto_alarm_id, time_rating, wakeup_rating, comment) => {
   return prisma.wakeup_feedbacks.create({
     data: {
       user_id: userId,
+      auto_alarm_id,
       time_rating,
       wakeup_rating,
       comment,

@@ -106,7 +106,41 @@ paths:
                 properties:
                   message:
                     type: string
-  
+    /users/me/auto-alarm-feedback:
+    post:
+      tags: [Users]
+      summary: 자동 알람 피드백 제출
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - auto_alarm_id
+                - time_rating
+                - wakeup_rating
+              properties:
+                auto_alarm_id:
+                  type: string
+                time_rating:
+                  type: integer
+                wakeup_rating:
+                  type: integer
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: 피드백 제출 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 components:
   securitySchemes:
     bearerAuth:
