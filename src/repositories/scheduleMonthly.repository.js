@@ -15,7 +15,7 @@ export const findSchedulesByMonth = async (userId, year, month) => {
       },
     },
     select: {
-      id: true,
+      schedule_id: true,
       color: true,
       start_date: true,
     },
