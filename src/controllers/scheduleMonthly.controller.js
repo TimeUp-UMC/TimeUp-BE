@@ -19,7 +19,11 @@ export const handleGetMonthlySchedule = async (req, res, next) => {
 
     const result = await getMonthlySchedule(userId, year, month);
 
-    res.success({ schedulesByDay: result }, 200);
+    res.success(
+      { 
+        message: '조회하신 월별 일정 목록입니다.',
+        schedulesByDay: result 
+      }, 200);
   } catch (error) {
     res.error(error, error.status || 500);
   }

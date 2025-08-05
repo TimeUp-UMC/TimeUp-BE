@@ -3,6 +3,7 @@ import { handleCreateSchedule } from '../controllers/scheduleCreate.controller.j
 import { handleUpdateSchedule } from '../controllers/scheduleUpdate.controller.js';
 import { handleDeleteSchedule } from '../controllers/scheduleDelete.controller.js';
 import { handleGetMonthlySchedule } from '../controllers/scheduleMonthly.controller.js';
+import { handleGetDailySchedule } from '../controllers/scheduleDaily.controller.js';
 
 const router = express.Router();
 
@@ -14,5 +15,7 @@ router.put('/:id', handleUpdateSchedule);
 router.delete('/:id', handleDeleteSchedule);
 // 월별 일정 조회 API
 router.get('/days', handleGetMonthlySchedule);
+// 일별 일정 조회 API
+router.get('/day', handleGetDailySchedule);
 
 export default router;
