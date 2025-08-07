@@ -1,7 +1,6 @@
 import { prisma } from '../db.config.js';
 
 export const getSchedulesByDate = async (userId, startDate, endDate) => {
-  console.log('DB Query Range:', startDate, endDate);
   return await prisma.schedules.findMany({
     where: {
       user_id: userId,
