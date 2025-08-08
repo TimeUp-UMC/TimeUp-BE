@@ -9,6 +9,7 @@ export const updateUserDto = {
 };
 
 export const feedbackDto = {
+  auto_alarm_id: 'string',
   time_rating: 'number (1~5)',
   wakeup_rating: 'number (1~5)',
   comment: 'string (optional)',
