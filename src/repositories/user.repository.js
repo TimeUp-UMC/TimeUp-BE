@@ -12,6 +12,15 @@ export const findUserById = (userId) => {
       avg_ready_time: true,
       duration_time: true,
       alarm_check_time: true,
+      home_address: true,
+      work_address: true,
+      user_preference_transport: {
+        select: {
+          transport: true,
+          priority: true
+        },
+        orderBy: { priority: 'asc' } //우선순위 순으로 정렬
+      }
     },
   });
 };
