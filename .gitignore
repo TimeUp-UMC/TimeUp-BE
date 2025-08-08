@@ -7,3 +7,5 @@ prisma/migrations
 
 package-lock.json
 /src/generated/prisma
+
+timeup-key-pair.pem

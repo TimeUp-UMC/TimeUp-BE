@@ -51,7 +51,7 @@ model my_alarms {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model recurrence_rules {
   recurrence_id         Int                                     @id @default(autoincrement())
-  schedule_id           Int
+  schedule_id           Int                                     @unique
   repeat_type           recurrence_rules_repeat_type
   repeat_mode           recurrence_rules_repeat_mode
   repeat_count          Int?                                    @default(1)
@@ -64,7 +64,7 @@ model recurrence_rules {
 
 model remind_rules {
   remind_id   Int @id @default(autoincrement())
-  schedule_id Int
+  schedule_id Int @unique
   remind_at   Int
 }
 
@@ -172,7 +172,6 @@ enum user_preference_transport_transport {
 }
 
 enum recurrence_rules_repeat_mode {
-  forever
   count
   until
 }

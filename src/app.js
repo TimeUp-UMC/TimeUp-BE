@@ -5,6 +5,7 @@ import session from 'express-session';
 import passport from 'passport';
 import authRoutes from './routers/authRouter.js';
 import alarmRoutes from './routers/alarmRouter.js';
+import scheduleRoutes from './routers/scheduleRouter.js';
 import userRoutes from './routers/userRouter.js'
 import './auth.config.js';
 import responseMiddleware from './middlewares/responseMiddleware.js';
@@ -58,6 +59,9 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/alarm', alarmRoutes);
 app.use('/users', userRoutes)
+
+// 일정 관련 API 라우터
+app.use('/schedules', scheduleRoutes);
 
 // 404 처리
 app.use((req, res, next) => {
