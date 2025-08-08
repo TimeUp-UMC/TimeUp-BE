@@ -102,39 +102,10 @@ export const handleLogout = async (userId) => {
 };
 
 export const handleOnboarding = async (userId, data) => {
-  const {
-    birth,
-    job,
-    avg_ready_time,
-    duration_time,
-    home_address,
-    work_address,
-    preferences,
-    wakeup_time,
-  } = data;
-
-  await userRespository.updateUser(userId, {
-    birth,
-    job,
-    avg_ready_time,
-    duration_time,
-    home_address,
-    work_address,
-    isNew: false,
-  });
-
-  console.log('기상 시간 ', wakeup_time);
-
-  if (Array.isArray(preferences)) {
-    await userRespository.saveUserPreferences(userId, preferences);
-  } else {
-    throw new InternalServerError('유저 선호도 데이터 오류');
-  }
-
-  if (wakeup_time && typeof wakeup_time === 'object') {
-    await userRespository.saveWakeupAlarms(userId, wakeup_time);
-  } else {
-    throw new InternalServerError('기상 시간 데이터 오류');
+  try {
+    await userRespository.saveOnboardingData(userId, data);
+  } catch (err) {
+    throw err;
   }
 };
 
