@@ -1,23 +1,23 @@
-
-
 import * as userRepository from '../repositories/user.repository.js';
 
-export const getUserInfo = (userId) => {
-  return userRepository.findUserById(userId);
+import { createAlarmFeedback } from '../repositories/user.repository.js';
+
+export const getUserInfo = async (userId) => {
+  return await userRepository.findUserById(userId);
 };
 
-export const updateUserInfo = (userId, updateData) => {
-  return userRepository.updateUser(userId, updateData);
+export const updateUserInfo = async (userId, updateData) => {
+  return await userRepository.updateUser(userId, updateData);
 };
 
-export  const getAlarmCheckTime = (userId) => {
-  return userRepository.getAlarmCheckTime(userId);
+export const getAlarmCheckTime = async (userId) => {
+  return await userRepository.getAlarmCheckTime(userId);
 };
 
-export  const updateAlarmCheckTime = (userId, alarm_check_time) => {
-  return userRepository.updateAlarmCheckTime(userId, alarm_check_time);
+export const updateAlarmCheckTime = async (userId, alarm_check_time) => {
+  return await userRepository.updateAlarmCheckTime(userId, alarm_check_time);
 };
 
-export  const submitAlarmFeedback = (userId, time_rating, wakeup_rating, comment) => {
-  return userRepository.createAlarmFeedback(userId, time_rating, wakeup_rating, comment);
+export  const submitAlarmFeedback = async (userId, auto_alarm_id, time_rating, wakeup_rating, comment) => {
+  return await userRepository.createAlarmFeedback(userId, auto_alarm_id, time_rating, wakeup_rating, comment);
 };
