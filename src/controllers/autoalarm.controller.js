@@ -1,17 +1,18 @@
-import { NotFoundError, UnauthorizedError } from "../errors/error.js";
+import { NotFoundError } from '../errors/error.js';
 import {
   createAutoAlarmDTO,
   updateAutoAlarmDTO,
-} from "../dtos/autoalarm.dto.js";
-import { activeAutoAlarmDTO } from "../dtos/autoalarm.dto.js";
-import { addAutoAlarmService } from "../services/autoalarm.service.js";
+  activeAutoAlarmDTO,
+  getMPAutoAlarmDTO,
+} from '../dtos/autoalarm.dto.js';
+import { addAutoAlarmService } from '../services/autoalarm.service.js';
 import {
   findAutoDataById,
   findAutoAlarmById,
-} from "../repositories/autoalarm.repository.js";
-import { updatedAutoAlarmService } from "../services/autoalarm.service.js";
-import { StatusCodes } from "http-status-codes";
-import { prisma } from "../db.config.js";
+} from '../repositories/autoalarm.repository.js';
+import { updatedAutoAlarmService } from '../services/autoalarm.service.js';
+import { StatusCodes } from 'http-status-codes';
+import { prisma } from '../db.config.js';
 
 // 자동 알람 생성
 export const addAutoAlarm = async (req, res, next) => {
@@ -19,7 +20,7 @@ export const addAutoAlarm = async (req, res, next) => {
     // 토큰 확인 및 user_id
     const userId = req.user?.user_id;
 
-    console.log("user_id:", userId);
+    console.log('user_id:', userId);
 
     // token_id로 사용자 정보 조회
     const exsitingUser = await prisma.users.findUnique({
@@ -27,7 +28,7 @@ export const addAutoAlarm = async (req, res, next) => {
     });
 
     if (!exsitingUser) {
-      throw new NotFoundError("사용자가 없습니다.");
+      throw new NotFoundError('사용자가 없습니다.');
     }
     // DTO 생성
     const dto = createAutoAlarmDTO(userId, req.body);
@@ -46,11 +47,11 @@ export const updateAutoAlarm = async (req, res, next) => {
   try {
     // url에서 auto_alarm_id
     const ATalarmId = parseInt(req.params.auto_alarm_id);
-    console.log("auto_alarm_id:", ATalarmId);
+    console.log('auto_alarm_id:', ATalarmId);
 
     const existingAutoAlarm = await findAutoAlarmById(ATalarmId);
     if (!existingAutoAlarm)
-      throw new NotFoundError("해당 알람이 존재하지 않습니다.", "404");
+      throw new NotFoundError('해당 알람이 존재하지 않습니다.', '404');
 
     // DTO 생성
     const dto = updateAutoAlarmDTO(ATalarmId, req.body);
@@ -72,7 +73,7 @@ export const activationAutoAlarm = async (req, res, next) => {
 
     const existingAutoAlarm = await findAutoAlarmById(ATalarmId);
     if (!existingAutoAlarm)
-      throw new NotFoundError("해당 알람이 존재하지 않습니다.", "404");
+      throw new NotFoundError('해당 알람이 존재하지 않습니다.', '404');
 
     const scheduleId = existingAutoAlarm.schedule_id;
 
@@ -84,6 +85,25 @@ export const activationAutoAlarm = async (req, res, next) => {
     const updateAutoAlarm = await updatedAutoAlarmService(ATalarmId, dto); // 수정과 동일
 
     return res.success(updateAutoAlarm);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 자동 알람 설정값 조회 api (마이페이지)
+export const getAutoAlarm = async (req, res, next) => {
+  try {
+    // url에서 auto_alarm_id
+    const ATalarmId = parseInt(req.params.auto_alarm_id);
+
+    const existingAutoAlarm = await findAutoAlarmById(ATalarmId);
+    if (!existingAutoAlarm)
+      throw new NotFoundError('해당 알람이 존재하지 않습니다.', '404');
+
+    // DTO 생성
+    const dto = getMPAutoAlarmDTO(existingAutoAlarm, ATalarmId);
+
+    return res.success(dto);
   } catch (error) {
     next(error);
   }

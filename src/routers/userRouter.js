@@ -4,7 +4,7 @@ import {
   updateUserInfo,
   getAlarmCheckTime,
   updateAlarmCheckTime,
-  submitAlarmFeedback,
+  postAlarmFeedback,
 } from '../controllers/user.controller.js';
 
 import authRouter from '../routers/authRouter.js'; // user.id 파싱을 위한 미들웨어
@@ -20,6 +20,6 @@ router.get('/me/auto-alarm-check-time', getAlarmCheckTime);
 router.put('/me/auto-alarm-check-time', updateAlarmCheckTime);
 router.patch('/me/auto-alarm-check-time', updateAlarmCheckTime);
 
-//router.post('/me/auto-alarm-feedback', submitAlarmFeedback);
+router.post('/me/auto-alarm-feedback', postAlarmFeedback);
 
 export default router;

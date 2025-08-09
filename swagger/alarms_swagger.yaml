@@ -1,9 +1,9 @@
 paths:
-  /alarms/sign-up:
+  /alarms/my:
     post:
       tags:
         - Alarms
-      summary: 회원 가입 API
+      summary: 내 알람 등록 API
       requestBody:
         required: true
         content:
@@ -11,28 +11,44 @@ paths:
             schema:
               type: object
               properties:
-                email:
+                my_alarm_name:
                   type: string
-                name:
+                my_alarm_time:
+                  type: datetime
+                is_active:
+                  type: boolean
+                is_repeating:
+                  type: boolean
+                is_sound:
+                  type: boolean
+                is_vibrating:
+                  type: boolean
+                vibration_type:
                   type: string
-                gender:
+                  enum: [short1, short2, long1, long2]
+                sound_id:
+                  type: int
+                repeat_interval:
+                  type: int
+                repeat_count:
+                  type: int
+                memo:
                   type: string
-                birth:
-                  type: string
-                  format: date
-                address:
-                  type: string
-                detailAddress:
-                  type: string
-                phoneNumber:
-                  type: string
-                preferences:
-                  type: array
-                  items:
-                    type: number
+              required:
+                - my_alarm_name
+                - my_alarm_time
+                - is_active
+                - is_repeating
+                - is_sound
+                - is_vibrating
+                - vibration_type
+                - sound_id
+                - repeat_interval
+                - repeat_count
+                - memo
       responses:
         '200':
-          description: 회원 가입 성공 응답
+          description: 내 알람 등록 성공 응답
           content:
             application/json:
               schema:
@@ -48,16 +64,44 @@ paths:
                   success:
                     type: object
                     properties:
-                      email:
+                      alarm_id:
+                        type: int
+                        example: 1
+                      my_alarm_name:
                         type: string
-                      name:
+                        example: "과제 알람"
+                      my_alarm_time:
+                        type: datetime
+                        example: "2023-10-01T22:00:00Z"
+                      is_active:
+                        type: boolean
+                        example: true
+                      is_repeating:
+                        type: boolean
+                        example: false
+                      is_sound:
+                        type: boolean
+                        example: true
+                      is_vibrating:
+                        type: boolean
+                        example: true
+                      vibration_type:
                         type: string
-                      preferCategory:
-                        type: array
-                        items:
-                          type: string
+                        example: "short1"
+                      sound_id:
+                        type: int
+                        example: 1
+                      repeat_interval:
+                        type: int
+                        example: 0
+                      repeat_count:
+                        type: int
+                        example: 0
+                      memo:
+                        type: string
+                        example: "알람 메모"
         '400':
-          description: 회원 가입 실패 응답
+          description: 내 알람 등록 실패 응답
           content:
             application/json:
               schema:
@@ -71,11 +115,670 @@ paths:
                     properties:
                       errorCode:
                         type: string
-                        example: U001
+                        example: A001
                       reason:
                         type: string
                       data:
                         type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+              examples:
+                MissingTimeError:
+                  summary: 시간 설정 필수
+                  value:
+                    resultType: FAIL
+                    error:
+                      errorCode: A001
+                      reason: "알람 시간을 설정하지 않았습니다."
+                      data: null
+                    success: null
+                PassTimeError:
+                  summary: 과거 시간 설정 불가
+                  value:
+                    resultType: FAIL
+                    error:
+                      errorCode: A002
+                      reason: "과거 시간에는 알람을 설정할 수 없습니다."
+                      data: null
+                    success: null
+  /alarm/{alarm_id}/my:
+    put:
+      tags:
+        - Alarms
+      summary: 내 알람 수정 API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                my_alarm_name:
+                  type: string
+                my_alarm_time:
+                  type: datetime
+                is_active:
+                  type: boolean
+                is_repeating:
+                  type: boolean
+                is_sound:
+                  type: boolean
+                is_vibrating:
+                  type: boolean
+                vibration_type:
+                  type: string
+                  enum: [short1, short2, long1, long2]
+                sound_id:
+                  type: int
+                repeat_interval:
+                  type: int
+                repeat_count:
+                  type: int
+                memo:
+                  type: string
+              required:
+                - my_alarm_name
+                - my_alarm_time
+                - is_active
+                - is_repeating
+                - is_sound
+                - is_vibrating
+                - vibration_type
+                - sound_id
+                - repeat_interval
+                - repeat_count
+                - memo
+      responses:
+        '200':
+          description: 내 알람 수정 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: object
+                    properties:
+                      alarm_id:
+                        type: int
+                        example: 1
+                      my_alarm_name:
+                        type: string
+                        example: "과제 알람"
+                      my_alarm_time:
+                        type: datetime
+                        example: "2023-10-01T22:00:00Z"
+                      is_active:
+                        type: boolean
+                        example: true
+                      is_repeating:
+                        type: boolean
+                        example: false
+                      is_sound:
+                        type: boolean
+                        example: true
+                      is_vibrating:
+                        type: boolean
+                        example: true
+                      vibration_type:
+                        type: string
+                        example: "short1"
+                      sound_id:
+                        type: int
+                        example: 1
+                      repeat_interval:
+                        type: int
+                        example: 0
+                      repeat_count:
+                        type: int
+                        example: 0
+                      memo:
+                        type: string
+                        example: "알람 메모"
+        '400':
+          description: 내 알람 수정 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A001
+                      reason:
+                        type: string
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+              examples:
+                MissingTimeError:
+                  summary: 시간 설정 필수
+                  value:
+                    resultType: FAIL
+                    error:
+                      errorCode: A001
+                      reason: "알람 시간을 설정하지 않았습니다."
+                      data: null
+                    success: null
+                PastTimeError:
+                  summary: 과거 시간 설정 불가
+                  value:
+                    resultType: FAIL
+                    error:
+                      errorCode: A002
+                      reason: "과거 시간에는 알람을 설정할 수 없습니다."
+                      data: null
+                    success: null
+                NotFoundError:
+                  summary: 알람이 존재하지 않음
+                  value:
+                    resultType: FAIL
+                    error:
+                      errorCode: A003
+                      reason: "해당 알람이 존재하지 않습니다."
+                      data: null
+                    success: null
+  /alarm/my/{alarm_id}/my-active:
+    patch:
+      tags:
+        - Alarms
+      summary: 내 알람 활성화/비활성화 API
+      parameters:
+        - in: path
+          name: alarm_id
+          required: true
+          schema:
+            type: integer
+          description: 알람 ID
+      responses:
+        '200':
+          description: 내 알람 활성화/비활성화 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: object
+                    properties:
+                      alarm_id:
+                        type: int
+                        example: 1
+                      is_active:
+                        type: boolean
+                        example: false
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: "2023-10-01T12:00:00Z"
+        '400':
+          description: 내 알람 활성화/비활성화 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A003
+                      reason:
+                        type: string
+                        example: "해당 알람이 존재하지 않습니다."
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+  /alarm/my/{alarm_id}/my-delete:
+    delete:
+      tags:
+        - Alarms
+      summary: 내 알람 삭제 API
+      parameters:
+        - in: path
+          name: alarm_id
+          required: true
+          schema:
+            type: integer
+          description: 알람 ID
+      responses:
+        '200':
+          description: 내 알람 삭제 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType: 
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: object
+                    properties:
+                      alarm_id:
+                        type: int
+                        example: 1
+        '400':
+          description: 내 알람 삭제 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A003
+                      reason:
+                        type: string
+                        example: "해당 알람이 존재하지 않습니다."
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+  /alarm/{wakeup_alarm_id}/wakeup:
+    put:
+      tags:
+        - Alarms
+      summary: 기상 알람 수정 API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                wakeup_time:
+                  type: datetime
+                is_active:
+                  type: boolean
+                is_repeating:
+                  type: boolean
+                is_sound:
+                  type: boolean
+                is_vibrating:
+                  type: boolean
+                vibration_type:
+                  type: string
+                  enum: [short1, short2, long1, long2]
+                sound_id:
+                  type: int
+                repeat_interval:
+                  type: int
+                repeat_count:
+                  type: int
+                memo:
+                  type: string
+              required:
+                - wakeup_time
+                - is_active
+                - is_repeating
+                - is_sound
+                - is_vibrating
+                - vibration_type
+                - sound_id
+                - repeat_interval
+                - repeat_count
+                - memo
+      responses:
+        '200':
+          description: 기상 알람 수정 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: object
+                    properties:
+                      wakeup_alarm_id:
+                        type: int
+                        example: 1
+                      wakeup_alarm_name:
+                        type: string
+                        example: "기상 알람"
+                      wakeup_alarm_time:
+                        type: datetime
+                        example: "2023-10-01T07:00:00Z"
+                      is_active:
+                        type: boolean
+                        example: true
+                      is_repeating:
+                        type: boolean
+                        example: false
+                      is_sound:
+                        type: boolean
+                        example: true
+                      is_vibrating:
+                        type: boolean
+                        example: true
+                      vibration_type:
+                        type: string
+                        example: "short1"
+                      sound_id:
+                        type: int
+                        example: 1
+                      repeat_interval:
+                        type: int
+                        example: 0
+                      repeat_count:
+                        type: int
+                        example: 0
+                      memo:
+                        type: string
+                        example: "알람 메모"
+        '400':
+          description: 기상 알람 수정 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A001
+                      reason:
+                        type: string
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+              examples:
+                NotFoundError:
+                  summary: 알람이 존재하지 않음
+                  value:
+                    resultType: FAIL
+                    error:
+                      errorCode: A003
+                      reason: "해당 알람이 존재하지 않습니다."
+                      data: null
+                    success: null
+  /alarm/{wakeup_alarm_id}/wakeup-active:
+    patch:
+      tags:
+        - Alarms
+      summary: 기상 알람 활성화/비활성화 API
+      parameters:
+        - in: path
+          name: wakeup_alarm_id
+          required: true
+          schema:
+            type: integer
+          description: 기상 알람 ID
+      responses:
+        '200':
+          description: 기상 알람 활성화/비활성화 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: object
+                    properties:
+                      wakeup_alarm_id:
+                        type: int
+                        example: 1
+                      is_active:
+                        type: boolean
+                        example: false
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: "2023-10-01T12:00:00Z"
+        '400':
+          description: 기상 알람 활성화/비활성화 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A003
+                      reason:
+                        type: string
+                        example: "해당 알람이 존재하지 않습니다."
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+  /alarm/{auto_alarm_id}/auto-active:
+    patch:
+      tags:
+        - Alarms
+      summary: 자동 알람 활성화/비활성화 API
+      parameters:
+        - in: path
+          name: auto_alarm_id
+          required: true
+          schema:
+            type: integer
+          description: 자동 알람 ID
+      responses:
+        '200':
+          description: 자동 알람 활성화/비활성화 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: object
+                    properties:
+                      auto_alarm_id:
+                        type: int
+                        example: 1
+                      is_active:
+                        type: boolean
+                        example: false
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: "2023-10-01T12:00:00Z"
+        '400':
+          description: 자동 알람 활성화/비활성화 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A003
+                      reason:
+                        type: string
+                        example: "해당 알람이 존재하지 않습니다."
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+  /alarm/alarmlist:
+    get:
+      tags:
+        - Alarms
+      summary: 알람 조회 API
+      responses:
+        '200':
+          description: 알람 조회 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        wakeup_alarm:
+                          type: object
+                          properties:
+                            wakeup_time:
+                              type: datetime
+                              example: "2023-10-01T07:00:00Z"
+                            is_active:
+                              type: boolean
+                              example: true
+                            day:
+                              type: int
+                              example: 1
+                        my_alarm:
+                          type: object
+                          properties:
+                            my_alarm_name:
+                              type: string
+                              example: "과제 알람"
+                            my_alarm_time:
+                              type: datetime
+                              example: "2023-10-01T08:00:00Z"
+                            is_active:
+                              type: boolean
+                              example: true
+                          auto_alarm:
+                            type: object
+                            properties:
+                              auto_alarm_id:
+                                type: int
+                                example: 1
+                              auto_alarm_time:
+                                type: datetime
+                                example: "2023-10-01T08:00:00Z"
+                              is_active:
+                                type: boolean
+                                example: true
+        '400':
+          description: 알람 조회 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A004
+                      reason:
+                        type: string
+                        example: "알람 조회에 실패했습니다."
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
                   success:
                     type: object
                     nullable: true

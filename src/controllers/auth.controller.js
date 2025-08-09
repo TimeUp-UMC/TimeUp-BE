@@ -65,7 +65,7 @@ export const onboarding = async (req, res) => {
     res.success({ message: '온보딩 완료' });
   } catch (err) {
     console.error('온보딩 실패', err);
-    throw new InternalServerError();
+    throw new InternalServerError(err);
   }
 };
 

@@ -12,10 +12,12 @@ import {
 } from '../controllers/wakeupalarm.controller.js';
 import {
   activationAutoAlarm,
-  addAutoAlarm,
   updateAutoAlarm,
+  addAutoAlarm,
+  getAutoAlarm,
 } from '../controllers/autoalarm.controller.js';
 import { getAllAlarm } from '../controllers/alarm.controller.js';
+// import { pushTokenAlarm } from "../controllers/alarm.controller.js";
 
 const router = express.Router();
 
@@ -40,5 +42,9 @@ router.patch('/:auto_alarm_id/auto-active', activationAutoAlarm);
 router.delete('/:alarm_id/my-delete', deleteMyAlarm);
 // 알람 조회 API
 router.get('/alarmlist', getAllAlarm);
+// 자동 알람 설정값 조회 API (마이페이지)
+router.get('/:auto_alarm_id/auto-mypage', getAutoAlarm);
+// 푸시 알람 토큰 저장 API
+// router.post('/push-token', pushTokenAlarm);
 
 export default router;
