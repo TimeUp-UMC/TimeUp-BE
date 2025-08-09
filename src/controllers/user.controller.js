@@ -29,6 +29,13 @@ export const updateAlarmCheckTime = async (req, res) => {
 export const submitAlarmFeedback = async (req, res) => {
   const userId = req.user?.user_id;
   const { time_rating, wakeup_rating, comment } = req.body;
-  await userService.submitAlarmFeedback(userId, time_rating, wakeup_rating, comment);
-  return res.status(200).json({ message: '피드백이 성공적으로 저장되었습니다' });
+  await userService.submitAlarmFeedback(
+    userId,
+    time_rating,
+    wakeup_rating,
+    comment
+  );
+  return res
+    .status(200)
+    .json({ message: '피드백이 성공적으로 저장되었습니다' });
 };

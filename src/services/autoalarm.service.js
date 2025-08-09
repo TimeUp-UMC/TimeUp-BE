@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
 import {
@@ -7,10 +7,10 @@ import {
   getAutoAlarmInDB,
   findAutoDataById,
   createAutoAlarmInDB,
-} from "../repositories/autoalarm.repository.js";
-import { prisma } from "../db.config.js";
+} from '../repositories/autoalarm.repository.js';
+import { prisma } from '../db.config.js';
 
-import axios from "axios";
+import axios from 'axios';
 const KAKAO_API_KEY = process.env.KAKAO_API_KEY;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
@@ -44,8 +44,8 @@ function toUnixTimestamp(dateTimeStr) {
 // Unix timestamp (초) -> "HH:mm" 문자열
 function toTimeStringFromUnix(unixTime) {
   const date = new Date(unixTime * 1000);
-  const h = date.getHours().toString().padStart(2, "0");
-  const m = date.getMinutes().toString().padStart(2, "0");
+  const h = date.getHours().toString().padStart(2, '0');
+  const m = date.getMinutes().toString().padStart(2, '0');
   return `${h}:${m}`;
 }
 
@@ -79,7 +79,7 @@ export async function getDrivingRoute(origin, destination, departure_time) {
   if (!res.ok) throw new Error(`자동차 경로 요청 실패: ${await res.text()}`);
   const data = await res.json();
 
-  let durationText = "이동 시간 정보 없음";
+  let durationText = '이동 시간 정보 없음';
   let arrivalTime = null;
 
   if (data.routes?.length > 0) {
@@ -105,8 +105,8 @@ export async function getTransitRoute(
   travel_mode
 ) {
   const timestamp = toUnixTimestamp(departure_time);
-  const [x1, y1] = origin.split(",");
-  const [x2, y2] = destination.split(",");
+  const [x1, y1] = origin.split(',');
+  const [x2, y2] = destination.split(',');
   const googleOrigin = `${y1},${x1}`;
   const googleDestination = `${y2},${x2}`;
 
@@ -115,7 +115,7 @@ export async function getTransitRoute(
     destination: googleDestination,
     departure_time: timestamp.toString(),
     key: GOOGLE_API_KEY,
-    mode: "transit",
+    mode: 'transit',
     transit_mode: travel_mode,
   });
 
@@ -124,7 +124,7 @@ export async function getTransitRoute(
   );
   const data = await res.json();
 
-  if (data.status !== "OK" || !data.routes?.length) {
+  if (data.status !== 'OK' || !data.routes?.length) {
     throw new Error(
       `대중교통 경로 실패: ${data.status} - ${data.error_message}`
     );
@@ -134,7 +134,7 @@ export async function getTransitRoute(
   const durationValue = leg.duration?.value;
   const formatted = durationValue
     ? formatDuration(durationValue)
-    : "이동 시간 정보 없음";
+    : '이동 시간 정보 없음';
 
   return {
     formatted_duration: formatted,
@@ -145,8 +145,8 @@ export async function getTransitRoute(
 
 // 🚶 도보
 export function getWalkingRoute(origin, destination, departure_time) {
-  const [x1, y1] = origin.split(",").map(Number);
-  const [x2, y2] = destination.split(",").map(Number);
+  const [x1, y1] = origin.split(',').map(Number);
+  const [x2, y2] = destination.split(',').map(Number);
 
   const distance = haversineDistance(y1, x1, y2, x2);
   const averageSpeed = 1.33; // m/s
@@ -192,7 +192,7 @@ async function addressToCoords(address) {
     headers: { Authorization: `KakaoAK ${KAKAO_API_KEY}` },
   });
   const doc = res.data.documents[0];
-  if (!doc) throw new Error("주소로 좌표를 찾을 수 없습니다.");
+  if (!doc) throw new Error('주소로 좌표를 찾을 수 없습니다.');
   return { lat: doc.y, lng: doc.x };
 }
 
@@ -213,10 +213,10 @@ function parseDurationToSeconds(str) {
 // 'yyyyMMddHHmm' 형식으로 변환
 function formatDateTime(date) {
   const yyyy = date.getUTCFullYear();
-  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(date.getUTCDate()).padStart(2, "0");
-  const hh = String(date.getUTCHours()).padStart(2, "0");
-  const min = String(date.getUTCMinutes()).padStart(2, "0");
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  const hh = String(date.getUTCHours()).padStart(2, '0');
+  const min = String(date.getUTCMinutes()).padStart(2, '0');
 
   return `${yyyy}${mm}${dd}${hh}${min}`;
 }
@@ -226,7 +226,7 @@ export const addAutoAlarmService = async (dto) => {
   const { userId } = dto;
 
   const autoData = await findAutoDataById(userId);
-  if (!autoData) throw new Error("자동 알람 데이터를 찾을 수 없습니다.");
+  if (!autoData) throw new Error('자동 알람 데이터를 찾을 수 없습니다.');
 
   const {
     avg_ready_time,
@@ -300,9 +300,9 @@ async function getAccurateDepartureTime(
 
     let routeData;
 
-    if (travelMode === "car") {
+    if (travelMode === 'car') {
       routeData = await getDrivingRoute(origin, destination, departureTimeStr);
-    } else if (travelMode === "walk") {
+    } else if (travelMode === 'walk') {
       routeData = await getWalkingRoute(origin, destination, departureTimeStr);
     } else {
       // 기본은 transit (지하철/버스)
@@ -384,9 +384,9 @@ async function getRecommendedWakeupTime(
   const minutes = wakeupDateObj.getUTCMinutes();
 
   // 12시간제 포맷
-  const ampm = hours >= 12 ? "PM" : "AM";
+  const ampm = hours >= 12 ? 'PM' : 'AM';
   const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
-  const formattedMinute = String(minutes).padStart(2, "0");
+  const formattedMinute = String(minutes).padStart(2, '0');
 
   const wakeupTimeFormatted = `${formattedHour}:${formattedMinute} ${ampm}`;
   // console.log("기상 시간:", wakeupTimeFormatted);

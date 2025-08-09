@@ -1,14 +1,18 @@
-import { prisma } from "../db.config.js";
+import { prisma } from '../db.config.js';
 
 export const findAutoDataById = async (userId) => {
   const now = new Date();
-  const tomorrowStart = new Date(now);
-  tomorrowStart.setDate(now.getDate() + 1);
-  tomorrowStart.setHours(0, 0, 0, 0);
+  const createdAtKST = new Date(now.getTime() + 9 * 60 * 60 * 1000); // 9시간 더하기
+  const tomorrowStart = new Date(createdAtKST);
+  console.log('TS: ', tomorrowStart);
+  tomorrowStart.setDate(createdAtKST.getDate() + 1);
+  console.log('TS: ', tomorrowStart);
+  tomorrowStart.setUTCHours(0, 0, 0, 0);
 
   const tomorrowEnd = new Date(tomorrowStart);
-  tomorrowEnd.setHours(23, 59, 59, 999);
-
+  tomorrowEnd.setUTCHours(23, 59, 59, 999);
+  console.log('TS: ', tomorrowStart);
+  console.log('TE: ', tomorrowEnd);
   // 1. 유저 기본 정보
   const user = await prisma.users.findUnique({
     where: { user_id: userId },
@@ -19,7 +23,7 @@ export const findAutoDataById = async (userId) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
   // 2. 해당 유저의 내일 스케줄 중 가장 빠른 것 하나
@@ -32,7 +36,7 @@ export const findAutoDataById = async (userId) => {
       },
     },
     orderBy: {
-      start_date: "asc",
+      start_date: 'asc',
     },
     select: {
       schedule_id: true,
@@ -49,7 +53,7 @@ export const findAutoDataById = async (userId) => {
       user_id: userId,
     },
     orderBy: {
-      created_at: "desc",
+      created_at: 'desc',
     },
     take: 5,
     select: {
@@ -66,7 +70,7 @@ export const findAutoDataById = async (userId) => {
       user_id: userId,
     },
     orderBy: {
-      priority: "asc", // 가장 높은 우선순위 (1)
+      priority: 'asc', // 가장 높은 우선순위 (1)
     },
     select: {
       transport: true,
@@ -86,7 +90,7 @@ export const findAutoDataById = async (userId) => {
   return {
     ...user,
     schedule,
-    preferredTransport: preferredTransport?.transport ?? "bus",
+    preferredTransport: preferredTransport?.transport ?? 'bus',
     feedback,
   };
 };
