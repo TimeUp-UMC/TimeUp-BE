@@ -24,8 +24,8 @@ export const insertRemindRule = async (scheduleId, remindAt) => {
   return await prisma.remind_rules.create({
     data: {
       schedule_id: scheduleId,
-      remind_at: remindAt
-    }
+      remind_at: remindAt,
+    },
   });
 };
 
@@ -35,10 +35,12 @@ export const insertRecurrenceRule = async (scheduleId, repeatRule) => {
   return await prisma.recurrence_rules.create({
     data: {
       schedule_id: scheduleId,
-      repeat_type: repeatRule.repeatType,               // 'weekly' or 'monthly'
-      repeat_mode: repeatRule.repeatMode,               // 'count' | 'until'
+      repeat_type: repeatRule.repeatType, // 'weekly' or 'monthly'
+      repeat_mode: repeatRule.repeatMode, // 'count' | 'until'
       repeat_count: repeatRule.repeatCount ?? null,
-      repeat_until_date: repeatRule.repeatUntilDate ? new Date(repeatRule.repeatUntilDate) : null,
+      repeat_until_date: repeatRule.repeatUntilDate
+        ? new Date(repeatRule.repeatUntilDate)
+        : null,
       monthly_repeat_option: repeatRule.monthlyOption ?? null,
       day_of_month: repeatRule.dayOfMonth ?? null,
       nth_week: repeatRule.nthWeek ?? null,
@@ -52,7 +54,7 @@ export const insertRepeatWeekdays = async (recurrenceId, days) => {
   return await prisma.repeat_weekdays.createMany({
     data: days.map((day) => ({
       recurrence_id: recurrenceId,
-      day_of_week: day``
-    }))
+      day_of_week: day``,
+    })),
   });
 };
