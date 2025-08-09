@@ -4,15 +4,11 @@ export const findAutoDataById = async (userId) => {
   const now = new Date();
   const createdAtKST = new Date(now.getTime() + 9 * 60 * 60 * 1000); // 9시간 더하기
   const tomorrowStart = new Date(createdAtKST);
-  console.log('TS: ', tomorrowStart);
   tomorrowStart.setDate(createdAtKST.getDate() + 1);
-  console.log('TS: ', tomorrowStart);
   tomorrowStart.setUTCHours(0, 0, 0, 0);
 
   const tomorrowEnd = new Date(tomorrowStart);
   tomorrowEnd.setUTCHours(23, 59, 59, 999);
-  console.log('TS: ', tomorrowStart);
-  console.log('TE: ', tomorrowEnd);
   // 1. 유저 기본 정보
   const user = await prisma.users.findUnique({
     where: { user_id: userId },
