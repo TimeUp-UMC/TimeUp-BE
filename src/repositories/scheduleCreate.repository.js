@@ -6,25 +6,25 @@ export const insertSchedule = async (userId, data) => {
     data: {
       user_id: userId,
       name: data.name,
-      start_date: data.startDate,
-      end_date: data.endDate,
+      start_date: data.start_date,
+      end_date: data.end_date,
       color: data.color ?? 'red',
-      place_name: data.placeName,
+      place_name: data.place_name,
       address: data.address,
       memo: data.memo ?? null,
-      is_reminding: data.isReminding ?? false,
-      is_recurring: data.isRecurring ?? false,
-      is_important: data.isImportant ?? false,
+      is_reminding: data.is_reminding ?? false,
+      is_recurring: data.is_recurring ?? false,
+      is_important: data.is_important ?? false,
     },
   });
 };
 
 // remind_rules 테이블에 리마인드 알림 규칙 저장
-export const insertRemindRule = async (scheduleId, remindAt) => {
+export const insertRemindRule = async (scheduleId, remind_at) => {
   return await prisma.remind_rules.create({
     data: {
       schedule_id: scheduleId,
-      remind_at: remindAt
+      remind_at: remind_at
     }
   });
 };
