@@ -1,30 +1,41 @@
 import { getMonthlySchedule } from '../services/scheduleMonthly.service.js';
 import { UnauthorizedError, ValidationError } from '../errors/error.js';
 
-/// 사용자의 특정 월 일정들을 날짜별로 조회하는 컨트롤러
-/// 달력 뷰에 점 형태로 표시될 일정 색상 정보를 제공합니다
+// 월별 일정 목록 조회
+
 export const handleGetMonthlySchedule = async (req, res, next) => {
   try {
-    const userId = req.user?.user_id;
-    const year = Number(req.query.year);
-    const month = Number(req.query.month);
+    const userId = Number(req.user?.user_id);
+    const { month } = req.query;
 
     if (!userId) {
-      throw new UnauthorizedError('로그인 정보가 없습니다.');
+      throw new UnauthorizedError();
     }
 
-    if (!year || !month) {
-      throw new ValidationError('year와 month 쿼리 파라미터가 필요합니다.');
+    if (!month || !/^\d{4}-\d{2}$/.test(month)) {
+      throw new ValidationError('month 파라미터는 YYYY-MM 형식으로 입력해야 합니다.');
     }
 
-    const result = await getMonthlySchedule(userId, year, month);
+    const [yearStr, monthStr] = month.split('-');
+    const year = Number(yearStr);
+    const monthNum = Number(monthStr);
 
-    res.success(
+    const result = await getMonthlySchedule(userId, year, monthNum);
+
+    return res.success(
       { 
-        message: '조회하신 월별 일정 목록입니다.',
-        schedulesByDay: result 
-      }, 200);
+        message: '조회하신 달의 일정 목록입니다.',
+        schedulesByDay: result
+      },
+      200
+    );
   } catch (error) {
-    res.error(error, error.status || 500);
+
+    if (error instanceof ValidationError || error instanceof UnauthorizedError) {
+        return res.error(error, error.status);
+    }
+
+    const internalError = new InternalServerError();
+    return res.error(internalError, internalError.status);
   }
 };
