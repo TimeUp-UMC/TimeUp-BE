@@ -12,11 +12,11 @@ import {
 export const createScheduleWithRules = async (userId, data) => {
   const schedule = await insertSchedule(userId, data);
 
-  if (data.isReminding && data.remindAt !== undefined) {
-    await insertRemindRule(schedule.schedule_id, data.remindAt);
+  if (data.is_reminding && data.remind_at !== undefined) {
+    await insertRemindRule(schedule.schedule_id, data.remind_at);
   }
 
-  if (data.isRecurring && data.recurrenceRule) {
+  if (data.is_recurring && data.recurrenceRule) {
     const recurrence = await insertRecurrenceRule(schedule.schedule_id, data.recurrenceRule);
 
     if (

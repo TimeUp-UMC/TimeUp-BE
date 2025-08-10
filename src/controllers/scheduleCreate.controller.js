@@ -23,7 +23,6 @@ export const handleCreateSchedule = async (req, res, next) => {
       200
     );
   } catch (error) {
-    console.error('서버 오류 발생:', error);
 
     if (error instanceof ValidationError || error instanceof UnauthorizedError) {
         return res.error(error, error.status);
