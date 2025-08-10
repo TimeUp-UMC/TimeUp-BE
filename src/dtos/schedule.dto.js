@@ -6,27 +6,27 @@ const allowedRemindValues = [0, 5, 10, 30, 60, 1440];
 export const bodyToSchedule = (body) => {
   const {
     name,
-    startDate,
-    endDate,
+    start_date,
+    end_date,
     color = 'red',
-    placeName,
+    place_name,
     address,
-    isImportant = false,
-    isReminding = false,
-    isRecurring = false,
-    remindAt,
+    is_important = false,
+    is_reminding = false,
+    is_recurring = false,
+    remind_at,
     recurrenceRule,
     memo,
   } = body;
 
   // 필수값 검사
-  if (!name || !startDate || !endDate || !color || !placeName || !address) {
+  if (!name || !start_date || !end_date || !color || !place_name || !address) {
     throw new ValidationError('필수 일정 정보가 누락되었습니다.');
   }
 
   // 날짜 변환 및 유효성 검사
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const start = new Date(start_date);
+  const end = new Date(end_date);
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     throw new ValidationError('날짜 형식이 올바르지 않습니다.');
   }
@@ -42,14 +42,14 @@ export const bodyToSchedule = (body) => {
   }
 
   // 리마인드 유효성 검사
-  if (isReminding) {
-    if (typeof remindAt !== 'number' || !allowedRemindValues.includes(remindAt)) {
+  if (is_reminding) {
+    if (typeof remind_at !== 'number' || !allowedRemindValues.includes(remind_at)) {
       throw new ValidationError(`리마인드 시간은 지정된 옵션 중 하나여야 합니다. 사용 가능한 옵션: ${allowedRemindValues.join(', ')}`);
     }
   }
 
   // 반복 규칙 유효성 검사
-  if (isRecurring && recurrenceRule) {
+  if (is_recurring && recurrenceRule) {
     if (!['weekly', 'monthly'].includes(recurrenceRule.repeatType)) {
       throw new ValidationError('반복 주기는 weekly 또는 monthly여야 합니다.');
     }
@@ -101,16 +101,16 @@ export const bodyToSchedule = (body) => {
 
   return {
     name,
-    startDate: start,
-    endDate: end,
+    start_date: start,
+    end_date: end,
     color,
-    placeName,
+    place_name,
     address,
-    isImportant,
-    isReminding,
-    isRecurring,
-    remindAt: isReminding ? remindAt : null,
-    recurrenceRule: isRecurring ? recurrenceRule : null,
+    is_important,
+    is_reminding,
+    is_recurring,
+    remind_at: is_reminding ? remind_at : null,
+    recurrenceRule: is_recurring ? recurrenceRule : null,
     memo: memo ?? null,
   };
 };

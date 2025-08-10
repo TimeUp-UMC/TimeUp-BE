@@ -16,7 +16,7 @@ router.put('/:id', handleUpdateSchedule);
 // 일정 삭제 API
 router.delete('/:id', handleDeleteSchedule);
 // 월별 일정 조회 API
-router.get('/days', handleGetMonthlySchedule);
+router.get('/monthly', handleGetMonthlySchedule);
 // 일별 일정 조회 API
 router.get('/day', handleGetDailySchedule);
 // 주요 일정 조회 API
