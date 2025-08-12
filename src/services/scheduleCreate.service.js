@@ -16,14 +16,14 @@ export const createScheduleWithRules = async (userId, data) => {
     await insertRemindRule(schedule.schedule_id, data.remind_at);
   }
 
-  if (data.is_recurring && data.recurrenceRule) {
-    const recurrence = await insertRecurrenceRule(schedule.schedule_id, data.recurrenceRule);
+  if (data.is_recurring && data.recurrence_rule) {
+    const recurrence = await insertRecurrenceRule(schedule.schedule_id, data.recurrence_rule);
 
     if (
-      data.recurrenceRule.repeatType === 'weekly' &&
-      Array.isArray(data.recurrenceRule.repeatWeekdays)
+      data.recurrence_rule.repeat_type === 'weekly' &&
+      Array.isArray(data.recurrence_rule.repeat_weekdays)
     ) {
-      await insertRepeatWeekdays(recurrence.recurrence_id, data.recurrenceRule.repeatWeekdays);
+      await insertRepeatWeekdays(recurrence.recurrence_id, data.recurrence_rule.repeat_weekdays);
     }
   }
 

@@ -35,29 +35,29 @@ export const deleteRemindRule = async (scheduleId, tx = prisma) => {
 };
 
 // recurrence_rules 있으면 update, 없으면 insert
-export const upsertRecurrenceRule = async (scheduleId, recurrenceRule, tx = prisma) => {
+export const upsertRecurrenceRule = async (scheduleId, recurrence_rule, tx = prisma) => {
   return await tx.recurrence_rules.upsert({
     where: { schedule_id: scheduleId },
     update: {
-      repeat_type: recurrenceRule.repeatType,
-      repeat_mode: recurrenceRule.repeatMode,
-      repeat_count: recurrenceRule.repeatCount ?? null,
-      repeat_until_date: recurrenceRule.repeatUntilDate ? new Date(recurrenceRule.repeatUntilDate) : null,
-      monthly_repeat_option: recurrenceRule.monthlyOption ?? null,
-      day_of_month: recurrenceRule.dayOfMonth ?? null,
-      nth_week: recurrenceRule.nthWeek ?? null,
-      weekday: recurrenceRule.weekday ?? null,
+      repeat_type: recurrence_rule.repeat_type,
+      repeat_mode: recurrence_rule.repeat_mode,
+      repeat_count: recurrence_rule.repeat_count ?? null,
+      repeat_until_date: recurrence_rule.repeat_until_date ? new Date(recurrence_rule.repeat_until_date) : null,
+      monthly_repeat_option: recurrence_rule.monthly_option ?? null,
+      day_of_month: recurrence_rule.day_of_month ?? null,
+      nth_week: recurrence_rule.nth_week ?? null,
+      weekday: recurrence_rule.weekday ?? null,
     },
     create: {
       schedule_id: scheduleId,
-      repeat_type: recurrenceRule.repeatType,
-      repeat_mode: recurrenceRule.repeatMode,
-      repeat_count: recurrenceRule.repeatCount ?? null,
-      repeat_until_date: recurrenceRule.repeatUntilDate ? new Date(recurrenceRule.repeatUntilDate) : null,
-      monthly_repeat_option: recurrenceRule.monthlyOption ?? null,
-      day_of_month: recurrenceRule.dayOfMonth ?? null,
-      nth_week: recurrenceRule.nthWeek ?? null,
-      weekday: recurrenceRule.weekday ?? null,
+      repeat_type: recurrence_rule.repeat_type,
+      repeat_mode: recurrence_rule.repeat_mode,
+      repeat_count: recurrence_rule.repeat_count ?? null,
+      repeat_until_date: recurrence_rule.repeat_until_date ? new Date(recurrence_rule.repeat_until_date) : null,
+      monthly_repeat_option: recurrence_rule.monthly_option ?? null,
+      day_of_month: recurrence_rule.day_of_month ?? null,
+      nth_week: recurrence_rule.nth_week ?? null,
+      weekday: recurrence_rule.weekday ?? null,
     },
     select: { recurrence_id: true }, // 요일 덮어쓰기에 사용
   });

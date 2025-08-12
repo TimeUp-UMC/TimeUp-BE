@@ -1,5 +1,7 @@
 import { getScheduleDetailByScheduleId } from '../services/scheduleDetail.service.js';
-import { UnauthorizedError, ValidationError, NotFoundError, ForbiddenError } from '../errors/error.js';
+import { UnauthorizedError, NotFoundError, ForbiddenError, InternalServerError } from '../errors/error.js';
+
+// 일정 상세 조회
 
 export const handleGetScheduleDetail = async (req, res, next) => {
   try {
@@ -7,7 +9,6 @@ export const handleGetScheduleDetail = async (req, res, next) => {
     const scheduleId = Number(req.params.id);
 
     if (!userId) throw new UnauthorizedError();
-    if (!scheduleId) throw new ValidationError('일정 ID를 입력해주세요.');
 
     const schedule = await getScheduleDetailByScheduleId(scheduleId);
 
@@ -22,6 +23,16 @@ export const handleGetScheduleDetail = async (req, res, next) => {
       200
     );
   } catch (error) {
-    next(error);
+
+    if (
+      error instanceof UnauthorizedError ||
+      error instanceof NotFoundError ||
+      error instanceof ForbiddenError
+    ) {
+        return res.error(error, error.status);
+    }
+
+    const internalError = new InternalServerError();
+    return res.error(internalError, internalError.status);
   }
 };
