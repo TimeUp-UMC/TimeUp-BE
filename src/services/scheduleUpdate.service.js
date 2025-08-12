@@ -1,3 +1,4 @@
+import { prisma } from '../db.config.js';
 import {
   updateScheduleById,
   upsertRemindRule,
@@ -7,74 +8,56 @@ import {
   deleteRepeatWeekdays,
   insertRepeatWeekdays,
 } from '../repositories/scheduleUpdate.repository.js';
-import { NotFoundError } from '../errors/error.js';
+import { NotFoundError, ValidationError } from '../errors/error.js';
 
-// 일정 수정 전체 처리 서비스
 export const updateScheduleWithRules = async (scheduleId, userId, data) => {
-  // 0. 유효성 검사
-  if (
-    !(data.startDate instanceof Date) || isNaN(data.startDate.getTime()) ||
-    !(data.endDate instanceof Date) || isNaN(data.endDate.getTime())
-  ) {
-    throw new ValidationError('startDate 또는 endDate가 유효한 날짜가 아닙니다.');
+  if (!(data.start_date instanceof Date) || !(data.end_date instanceof Date)) {
+    throw new ValidationError('날짜는 date 타입으로 전달되어야 합니다.');
   }
 
-  if (!data.placeName || typeof data.placeName !== 'string') {
-    throw new ValidationError('장소명이 누락되었거나 올바르지 않습니다.');
-  }
+  await prisma.$transaction(async (tx) => {
+    // 기본 일정 수정
+    const result = await updateScheduleById(scheduleId, userId, {
+      name: data.name,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      color: data.color,
+      place_name: data.place_name,
+      address: data.address,
+      memo: data.memo ?? null,
+      is_important: !!data.is_important,
+      is_reminding: !!data.is_reminding,
+      is_recurring: !!data.is_recurring,
+    }, tx);
 
-  // 1. 기본 일정 수정
-  console.log('[FINAL] updateScheduleById input:', {
-  name: data.name,
-  start_date: data.startDate instanceof Date ? data.startDate : new Date(data.startDate),
-  end_date: data.endDate instanceof Date ? data.endDate : new Date(data.endDate),
-  color: data.color,
-  place_name: data.placeName,
-  address: data.address,
-  memo: data.memo,
-  is_important: data.isImportant,
-  is_reminding: data.isReminding,
-  is_recurring: data.isRecurring,
-});
-
-  const result = await updateScheduleById(scheduleId, userId, {
-    name: data.name,
-    start_date: new Date(data.startDate),
-    end_date: new Date(data.endDate),
-    color: data.color,
-    place_name: data.placeName,
-    address: data.address,
-    memo: data.memo,
-    is_important: data.isImportant,
-    is_reminding: data.isReminding,
-    is_recurring: data.isRecurring,
-  });
-
-  if (result.count === 0) {
-    throw new NotFoundError('일정을 찾을 수 없습니다.');
-  }
-
-  // 2. 리마인드 알람 처리
-  if (data.isReminding && data.remindAt !== undefined) {
-    await upsertRemindRule(scheduleId, data.remindAt);
-  } else {
-    await deleteRemindRule(scheduleId);
-  }
-
-  // 3. 반복 규칙 처리
-  if (data.isRecurring && data.repeatRule) {
-    const recurrence = await upsertRecurrenceRule(scheduleId, data.repeatRule);
-
-    // 반복 요일 갱신
-    await deleteRepeatWeekdays(recurrence.recurrence_id);
-
-    if (Array.isArray(data.repeatRule.weeklyDays) && data.repeatRule.weeklyDays.length > 0) {
-      await insertRepeatWeekdays(recurrence.recurrence_id, data.repeatRule.weeklyDays);
+    if (!result || result.count === 0) {
+      throw new NotFoundError('해당 일정이 존재하지 않습니다.');
     }
-  } else {
-    // 반복 안함으로 설정한 경우, 기존 규칙 삭제
-    await deleteRecurrenceRule(scheduleId);
-  }
+
+    // 리마인드 알람 처리
+    if (data.is_reminding && data.remind_at !== undefined) {
+      await upsertRemindRule(scheduleId, data.remind_at, tx);
+    } else {
+      await deleteRemindRule(scheduleId, tx);
+    }
+
+    // 반복 규칙 처리
+    if (data.is_recurring && data.recurrenceRule) {
+      // upsert recurrence_rules (schedule_id UNIQUE 전제)
+      const recurrence = await upsertRecurrenceRule(scheduleId, data.recurrenceRule, tx);
+
+      // 요일 덮어쓰기
+      await deleteRepeatWeekdays(recurrence.recurrence_id, tx);
+
+      const days = data.recurrenceRule.repeatWeekdays;
+      if (Array.isArray(days) && days.length > 0) {
+        await insertRepeatWeekdays(recurrence.recurrence_id, days, tx);
+      }
+    } else {
+      // 반복 해제: 하위부터 삭제 후 규칙 삭제
+      await deleteRecurrenceRule(scheduleId, tx);
+    }
+  });
 
   return true;
 };
