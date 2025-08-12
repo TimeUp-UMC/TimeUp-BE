@@ -1,5 +1,4 @@
 import express from 'express';
-// import { addWakeUpAlarm } from "../controllers/wakeUpalarm.controller.js";
 import {
   addMyAlarm,
   activationMyAlarm,
@@ -7,6 +6,7 @@ import {
   deleteMyAlarm,
 } from '../controllers/myalarm.controller.js';
 import {
+  addWakeUpAlarm,
   activationWakeUpAlarm,
   updateWakeUpAlarm,
 } from '../controllers/wakeupalarm.controller.js';
