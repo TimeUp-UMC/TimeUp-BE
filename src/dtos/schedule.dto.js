@@ -15,7 +15,7 @@ export const bodyToSchedule = (body) => {
     is_reminding = false,
     is_recurring = false,
     remind_at,
-    recurrenceRule,
+    recurrence_rule,
     memo,
   } = body;
 
@@ -49,53 +49,53 @@ export const bodyToSchedule = (body) => {
   }
 
   // 반복 규칙 유효성 검사
-  if (is_recurring && recurrenceRule) {
-    if (!['weekly', 'monthly'].includes(recurrenceRule.repeatType)) {
+  if (is_recurring && recurrence_rule) {
+    if (!['weekly', 'monthly'].includes(recurrence_rule.repeat_type)) {
       throw new ValidationError('반복 주기는 weekly 또는 monthly여야 합니다.');
     }
 
-    if (!['count', 'until'].includes(recurrenceRule.repeatMode)) {
+    if (!['count', 'until'].includes(recurrence_rule.repeat_mode)) {
       throw new ValidationError('반복 종료 방식은 count 또는 until이어야 합니다.');
     }
 
     if (
-      recurrenceRule.repeatMode === 'until' &&
-      recurrenceRule.repeatUntilDate &&
-      new Date(recurrenceRule.repeatUntilDate) < start
+      recurrence_rule.repeat_mode === 'until' &&
+      recurrence_rule.repeat_until_date &&
+      new Date(recurrence_rule.repeat_until_date) < start
     ) {
       throw new ValidationError('반복 종료일은 시작일 이후여야 합니다.');
     }
 
     if (
-      recurrenceRule.repeatMode === 'count' &&
-      (typeof recurrenceRule.repeatCount !== 'number' || recurrenceRule.repeatCount < 1)
+      recurrence_rule.repeat_mode === 'count' &&
+      (typeof recurrence_rule.repeat_count !== 'number' || recurrence_rule.repeat_count < 1)
     ) {
       throw new ValidationError('반복 횟수는 1 이상의 숫자여야 합니다.');
     }
 
-    if (recurrenceRule.repeatType === 'weekly') {
-      if (!Array.isArray(recurrenceRule.repeatWeekdays)) {
+    if (recurrence_rule.repeat_type === 'weekly') {
+      if (!Array.isArray(recurrence_rule.repeat_weekdays)) {
         throw new ValidationError('반복 요일은 배열 형태여야 합니다.');
       }
 
       const startDay = start.getDay();
 
-      if (recurrenceRule.repeatWeekdays.length === 0) {
+      if (recurrence_rule.repeat_weekdays.length === 0) {
         throw new ValidationError('반복 요일은 최소 1개 이상 선택해야 합니다.');
       }
 
-      if (!recurrenceRule.repeatWeekdays.includes(startDay)) {
-        recurrenceRule.repeatWeekdays.push(startDay);
+      if (!recurrence_rule.repeat_weekdays.includes(startDay)) {
+        recurrence_rule.repeat_weekdays.push(startDay);
       }
 
-      const isValid = recurrenceRule.repeatWeekdays.every(
+      const isValid = recurrence_rule.repeat_weekdays.every(
         (day) => Number.isInteger(day) && day >= 0 && day <= 6
       );
       if (!isValid) {
         throw new ValidationError('반복 요일은 0-6 사이의 정수여야 합니다.');
       }
 
-      recurrenceRule.repeatWeekdays = [...new Set(recurrenceRule.repeatWeekdays)];
+      recurrence_rule.repeat_weekdays = [...new Set(recurrence_rule.repeat_weekdays)];
     }
   }
 
@@ -108,9 +108,9 @@ export const bodyToSchedule = (body) => {
     address,
     is_important,
     is_reminding,
-    is_recurring,
     remind_at: is_reminding ? remind_at : null,
-    recurrenceRule: is_recurring ? recurrenceRule : null,
+    is_recurring,
+    recurrence_rule: is_recurring ? recurrence_rule : null,
     memo: memo ?? null,
   };
 };

@@ -30,18 +30,18 @@ export const insertRemindRule = async (scheduleId, remind_at) => {
 };
 
 // recurrence_rules 테이블에 반복 규칙 저장
-export const insertRecurrenceRule = async (scheduleId, recurrenceRule) => {
+export const insertRecurrenceRule = async (scheduleId, recurrence_rule) => {
   return await prisma.recurrence_rules.create({
     data: {
       schedule_id: scheduleId,
-      repeat_type: recurrenceRule.repeatType, // 'weekly' or 'monthly'
-      repeat_mode: recurrenceRule.repeatMode, // 'count' or 'until'
-      repeat_count: recurrenceRule.repeatCount ?? null,
-      repeat_until_date: recurrenceRule.repeatUntilDate ? new Date(recurrenceRule.repeatUntilDate) : null,
-      monthly_repeat_option: recurrenceRule.monthlyOption ?? null,
-      day_of_month: recurrenceRule.dayOfMonth ?? null,
-      nth_week: recurrenceRule.nthWeek ?? null,
-      weekday: recurrenceRule.weekday ?? null,
+      repeat_type: recurrence_rule.repeat_type, // 'weekly' or 'monthly'
+      repeat_mode: recurrence_rule.repeat_mode, // 'count' or 'until'
+      repeat_count: recurrence_rule.repeat_count ?? null,
+      repeat_until_date: recurrence_rule.repeat_until_date ? new Date(recurrence_rule.repeat_until_date) : null,
+      monthly_repeat_option: recurrence_rule.monthly_option ?? null,
+      day_of_month: recurrence_rule.day_of_month ?? null,
+      nth_week: recurrence_rule.nth_week ?? null,
+      weekday: recurrence_rule.weekday ?? null,
     },
   });
 };

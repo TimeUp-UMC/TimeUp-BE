@@ -42,14 +42,14 @@ export const updateScheduleWithRules = async (scheduleId, userId, data) => {
     }
 
     // 반복 규칙 처리
-    if (data.is_recurring && data.recurrenceRule) {
+    if (data.is_recurring && data.recurrence_rule) {
       // upsert recurrence_rules (schedule_id UNIQUE 전제)
-      const recurrence = await upsertRecurrenceRule(scheduleId, data.recurrenceRule, tx);
+      const recurrence = await upsertRecurrenceRule(scheduleId, data.recurrence_rule, tx);
 
       // 요일 덮어쓰기
       await deleteRepeatWeekdays(recurrence.recurrence_id, tx);
 
-      const days = data.recurrenceRule.repeatWeekdays;
+      const days = data.recurrence_rule.repeat_weekdays;
       if (Array.isArray(days) && days.length > 0) {
         await insertRepeatWeekdays(recurrence.recurrence_id, days, tx);
       }
