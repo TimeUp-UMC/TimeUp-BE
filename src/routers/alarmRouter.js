@@ -6,7 +6,6 @@ import {
   deleteMyAlarm,
 } from '../controllers/myalarm.controller.js';
 import {
-  addWakeUpAlarm,
   activationWakeUpAlarm,
   updateWakeUpAlarm,
 } from '../controllers/wakeupalarm.controller.js';
