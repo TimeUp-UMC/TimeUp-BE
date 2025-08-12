@@ -32,10 +32,19 @@ export const postAlarmFeedback = async (req, res) => {
     const userId = req.user?.user_id; // JWT 토큰에서 추출
     const { auto_alarm_id, time_rating, wakeup_rating, comment } = req.body;
 
-    await submitAlarmFeedback(userId, auto_alarm_id, Number(time_rating), Number(wakeup_rating), comment);
+    await submitAlarmFeedback(
+      userId,
+      auto_alarm_id,
+      Number(time_rating),
+      Number(wakeup_rating),
+      comment
+    );
 
     res.status(200).json({ message: '피드백이 성공적으로 저장되었습니다' });
   } catch (error) {
-    res.status(400).json({ message: '피드백 저장 중 오류가 발생했습니다', error: error.message });
+    res.status(400).json({
+      message: '피드백 저장 중 오류가 발생했습니다',
+      error: error.message,
+    });
   }
 };

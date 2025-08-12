@@ -6,18 +6,23 @@ import {
   deleteMyAlarm,
 } from '../controllers/myalarm.controller.js';
 import {
+  addWakeUpAlarm,
   activationWakeUpAlarm,
   updateWakeUpAlarm,
 } from '../controllers/wakeupalarm.controller.js';
 import {
   activationAutoAlarm,
   updateAutoAlarm,
+  addAutoAlarm,
   getAutoAlarm,
 } from '../controllers/autoalarm.controller.js';
 import { getAllAlarm } from '../controllers/alarm.controller.js';
-//import { pushTokenAlarm } from "../controllers/alarm.controller.js";
+// import { pushTokenAlarm } from "../controllers/alarm.controller.js";
 
 const router = express.Router();
+
+// 자동 알람 등록
+router.post('/auto', addAutoAlarm);
 
 // 내 알람 등록 API
 router.post('/my', addMyAlarm);
