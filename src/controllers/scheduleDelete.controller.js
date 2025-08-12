@@ -1,7 +1,5 @@
 import { deleteScheduleWithRules } from '../services/scheduleDelete.service.js';
-import {
-  UnauthorizedError, InternalServerError, NotFoundError,
-} from '../errors/error.js';
+import { UnauthorizedError, NotFoundError, InternalServerError } from '../errors/error.js';
 
 export const handleDeleteSchedule = async (req, res, next) => {
   try {
@@ -22,10 +20,13 @@ export const handleDeleteSchedule = async (req, res, next) => {
       200
     );
   } catch (error) {
-    console.error('서버 오류 발생:', error);
 
-    if (error instanceof UnauthorizedError || error instanceof NotFoundError) {
-      return res.error(error, error.status);
+    if (
+      error instanceof UnauthorizedError ||
+      error instanceof NotFoundError ||
+      error instanceof ForbiddenError
+    ) {
+       return res.error(error, error.status);
     }
 
     const internalError = new InternalServerError();

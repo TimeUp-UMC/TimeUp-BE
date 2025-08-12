@@ -1,5 +1,5 @@
 import { getMonthlySchedule } from '../services/scheduleMonthly.service.js';
-import { UnauthorizedError, ValidationError } from '../errors/error.js';
+import { UnauthorizedError, NotFoundError, InternalServerError } from '../errors/error.js';
 
 // 월별 일정 목록 조회
 
@@ -20,19 +20,23 @@ export const handleGetMonthlySchedule = async (req, res, next) => {
     const year = Number(yearStr);
     const monthNum = Number(monthStr);
 
-    const result = await getMonthlySchedule(userId, year, monthNum);
+    const schedules = await getMonthlySchedule(userId, year, monthNum);
 
     return res.success(
       { 
         message: '조회하신 달의 일정 목록입니다.',
-        schedulesByDay: result
+        schedulesByDay: schedules
       },
       200
     );
   } catch (error) {
 
-    if (error instanceof ValidationError || error instanceof UnauthorizedError) {
-        return res.error(error, error.status);
+    if (
+      error instanceof ValidationError ||
+      error instanceof UnauthorizedError ||
+      error instanceof NotFoundError
+    ) {
+      return res.error(error, error.status);
     }
 
     const internalError = new InternalServerError();

@@ -10,11 +10,11 @@ export const getScheduleDetailByScheduleId = async (scheduleId) => {
   if (!baseSchedule) return null;
 
   const remindRule = await findRemindRuleByScheduleId(scheduleId);
-  const recurrenceRule = await findRecurrenceRuleByScheduleId(scheduleId);
+  const recurrence_rule = await findRecurrenceRuleByScheduleId(scheduleId);
 
-  let repeatWeekdays = [];
-  if (recurrenceRule?.recurrence_id) {
-    repeatWeekdays = await findRepeatWeekdaysByRecurrenceId(recurrenceRule.recurrence_id);
+  let repeat_weekdays = [];
+  if (recurrence_rule?.recurrence_id) {
+    repeat_weekdays = await findRepeatWeekdaysByRecurrenceId(recurrence_rule.recurrence_id);
   }
 
   return {
@@ -26,16 +26,16 @@ export const getScheduleDetailByScheduleId = async (scheduleId) => {
     color: baseSchedule.color,
     place_name: baseSchedule.place_name,
     address: baseSchedule.address,
-    memo: baseSchedule.memo,
-    is_reminding: baseSchedule.is_reminding,
-    is_recurring: baseSchedule.is_recurring,
     is_important: baseSchedule.is_important,
+    is_reminding: baseSchedule.is_reminding,
     reminder_minutes: remindRule?.remind_at ?? null,
-    recurrence_rule: recurrenceRule
+    is_recurring: baseSchedule.is_recurring,
+    recurrence_rule: recurrence_rule
       ? {
-          ...recurrenceRule,
-          repeat_weekdays: repeatWeekdays.map((r) => r.day_of_week),
+          ...recurrence_rule,
+          repeat_weekdays: (repeat_weekdays ?? []).map((r) => r.day_of_week),
         }
       : null,
+    memo: baseSchedule.memo ?? null
   };
 };

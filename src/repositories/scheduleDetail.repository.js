@@ -12,10 +12,10 @@ export const findScheduleById = async (scheduleId) =>
       color: true,
       place_name: true,
       address: true,
-      memo: true,
+      is_important: true,
       is_reminding: true,
       is_recurring: true,
-      is_important: true,
+      memo: true,
     },
   });
 
