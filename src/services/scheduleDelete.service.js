@@ -14,7 +14,7 @@ export const deleteScheduleWithRules = async (scheduleId, userId) => {
   const result = await deleteScheduleById(scheduleId, userId);
 
   if (result.count === 0) {
-    throw new NotFoundError('삭제할 일정을 찾을 수 없습니다.');
+    throw new NotFoundError('해당 일정이 존재하지 않습니다.');
   }
 
   return true;

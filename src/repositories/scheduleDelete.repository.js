@@ -23,7 +23,7 @@ export const deleteRecurrenceRule = async (scheduleId) => {
   });
 };
 
-// 일정 삭제 (user_id 조건 포함)
+// 일정 삭제
 export const deleteScheduleById = async (scheduleId, userId) => {
   return await prisma.schedules.deleteMany({
     where: { schedule_id: scheduleId, user_id: userId },
