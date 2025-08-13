@@ -51,7 +51,7 @@ model my_alarms {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model recurrence_rules {
   recurrence_id         Int                                     @id @default(autoincrement())
-  schedule_id           Int
+  schedule_id           Int                                     @unique
   repeat_type           recurrence_rules_repeat_type
   repeat_mode           recurrence_rules_repeat_mode
   repeat_count          Int?                                    @default(1)
@@ -64,7 +64,7 @@ model recurrence_rules {
 
 model remind_rules {
   remind_id   Int @id @default(autoincrement())
-  schedule_id Int
+  schedule_id Int @unique
   remind_at   Int
 }
 
@@ -88,8 +88,8 @@ model schedules {
   is_reminding Boolean         @default(false)
   is_recurring Boolean         @default(false)
   is_important Boolean         @default(false)
-  created_at   DateTime?       @db.Timestamp(0)
-  updated_at   DateTime?       @default(now()) @db.Timestamp(0)
+  created_at   DateTime?       @default(now()) @db.Timestamp(0)
+  updated_at   DateTime?       @updatedAt @db.Timestamp(0)
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -105,6 +105,7 @@ model user_preference_transport {
   user_id       Int
   transport     user_preference_transport_transport
   priority      Int
+  users users @relation(fields: [user_id], references: [user_id])
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -120,12 +121,14 @@ model users {
   work_address          String?                     @db.VarChar(255)
   isNew                 Boolean                     @default(true)
   alarm_check_time      DateTime                    @default(dbgenerated("'22:00:00'")) @db.Time(0)
+  user_preference_transport user_preference_transport[]
   created_at            DateTime?                   @db.Timestamp(0)
   updated_at            DateTime?                   @default(now()) @db.Timestamp(0)
   remind_is_sound       Boolean                     @default(true)
   remind_is_vibrating   Boolean                     @default(true)
   remind_sound_id       Int                         @default(0)
   remind_vibration_type users_remind_vibration_type @default(default)
+  push_token            String?
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -154,7 +157,7 @@ model wakeup_feedbacks {
   time_rating   Int
   wakeup_rating Int
   comment       String?  @db.VarChar(500)
-  created_at    DateTime @db.Timestamp(0)
+  created_at    DateTime @default(now()) @db.Timestamp(0)
 }
 
 enum recurrence_rules_repeat_type {
@@ -170,7 +173,6 @@ enum user_preference_transport_transport {
 }
 
 enum recurrence_rules_repeat_mode {
-  forever
   count
   until
 }
