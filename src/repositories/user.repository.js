@@ -36,10 +36,41 @@ export const findUserById = (userId) => {
   });
 };
 
-export const updateUser = (userId, updateData) => {
-  return prisma.users.update({
-    where: { user_id: userId },
-    data: updateData,
+export const updateUser = async (userId, updateData) => {
+  const {
+    birth,
+    avg_ready_time,
+    duration_time,
+    home_address,
+    work_address,
+    job,
+    preferences,
+  } = updateData;
+
+  return await prisma.$transaction(async (tx) => {
+    await tx.users.update({
+      where: { user_id: userId },
+      data: {
+        birth,
+        avg_ready_time,
+        duration_time,
+        home_address,
+        work_address,
+        job,
+        updated_at: new Date(),
+      },
+    });
+
+    await tx.user_preference_transport.deleteMany({
+      where: { user_id: userId },
+    });
+    await tx.user_preference_transport.createMany({
+      data: preferences.map((p) => ({
+        user_id: userId,
+        transport: p.transportType,
+        priority: p.priority,
+      })),
+    });
   });
 };
 
