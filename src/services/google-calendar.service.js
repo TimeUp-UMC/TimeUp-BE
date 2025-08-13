@@ -74,11 +74,15 @@ const getMonthRange = (year, month) => {
   return { timeMin: start.toISOString(), timeMax: endExclusive.toISOString() };
 };
 
-const getDayRange = (day) => {
-  const [y, m, d] = day.split('-').map(Number);
-  const start = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
-  const endExclusive = new Date(Date.UTC(y, m - 1, d + 1, 0, 0, 0));
-  return { timeMin: start.toISOString(), timeMax: endExclusive.toISOString() };
+const getDayRange = (yyyyMmDd) => {
+  const timeMin = `${yyyyMmDd}T00:00:00+09:00`;
+  const [y, m, d] = yyyyMmDd.split('-').map(Number);
+  const next = new Date(Date.UTC(y, m - 1, d) + 24 * 60 * 60 * 1000);
+  const y2 = next.getUTCFullYear();
+  const m2 = String(next.getUTCMonth() + 1).padStart(2, '0');
+  const d2 = String(next.getUTCDate()).padStart(2, '0');
+  const timeMax = `${y2}-${m2}-${d2}T00:00:00+09:00`;
+  return { timeMin, timeMax };
 };
 
 const listNonTimeupCalendars = async (userId) => {
@@ -118,6 +122,7 @@ const listEventsForCalendar = async (
         orderBy: 'startTime',
         maxResults: 100,
         pageToken,
+        timeZone: 'Asia/Seoul',
       });
       all.push(...(res.data.items || []));
       pageToken = res.data.nextPageToken;
