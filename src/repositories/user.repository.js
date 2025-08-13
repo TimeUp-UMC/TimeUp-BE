@@ -17,26 +17,59 @@ export const findUserById = (userId) => {
       user_preference_transport: {
         select: {
           transport: true,
-          priority: true
+          priority: true,
         },
-        orderBy: { priority: 'asc' } //우선순위 순으로 정렬
-      }
+        orderBy: { priority: 'asc' }, //우선순위 순으로 정렬
+      },
     },
   });
 };
 
-export const updateUser = (userId, updateData) => {
-  return prisma.users.update({
-    where: { user_id: userId },
-    data: updateData,
+export const updateUser = async (userId, updateData) => {
+  const {
+    birth,
+    avg_ready_time,
+    duration_time,
+    home_address,
+    work_address,
+    job,
+    preferences,
+  } = updateData;
+
+  return await prisma.$transaction(async (tx) => {
+    await tx.users.update({
+      where: { user_id: userId },
+      data: {
+        birth,
+        avg_ready_time,
+        duration_time,
+        home_address,
+        work_address,
+        job,
+        updated_at: new Date(),
+      },
+    });
+
+    await tx.user_preference_transport.deleteMany({
+      where: { user_id: userId },
+    });
+    await tx.user_preference_transport.createMany({
+      data: preferences.map((p) => ({
+        user_id: userId,
+        transport: p.transportType,
+        priority: p.priority,
+      })),
+    });
   });
 };
 
 export const getAlarmCheckTime = (userId) => {
-  return prisma.users.findUnique({
-    where: { user_id: userId },
-    select: { alarm_check_time: true },
-  }).then(user => user.alarm_check_time);
+  return prisma.users
+    .findUnique({
+      where: { user_id: userId },
+      select: { alarm_check_time: true },
+    })
+    .then((user) => user.alarm_check_time);
 };
 
 export const updateAlarmCheckTime = (userId, alarm_check_time) => {
@@ -46,7 +79,13 @@ export const updateAlarmCheckTime = (userId, alarm_check_time) => {
   });
 };
 
-export const createAlarmFeedback = (userId, auto_alarm_id, time_rating, wakeup_rating, comment) => {
+export const createAlarmFeedback = (
+  userId,
+  auto_alarm_id,
+  time_rating,
+  wakeup_rating,
+  comment
+) => {
   return prisma.wakeup_feedbacks.create({
     data: {
       user_id: userId,
