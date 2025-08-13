@@ -74,11 +74,15 @@ const getMonthRange = (year, month) => {
   return { timeMin: start.toISOString(), timeMax: endExclusive.toISOString() };
 };
 
-const getDayRange = (day) => {
-  const [y, m, d] = day.split('-').map(Number);
-  const start = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
-  const endExclusive = new Date(Date.UTC(y, m - 1, d + 1, 0, 0, 0));
-  return { timeMin: start.toISOString(), timeMax: endExclusive.toISOString() };
+const getDayRange = (yyyyMmDd) => {
+  const timeMin = `${yyyyMmDd}T00:00:00+09:00`;
+  const [y, m, d] = yyyyMmDd.split('-').map(Number);
+  const next = new Date(Date.UTC(y, m - 1, d) + 24 * 60 * 60 * 1000);
+  const y2 = next.getUTCFullYear();
+  const m2 = String(next.getUTCMonth() + 1).padStart(2, '0');
+  const d2 = String(next.getUTCDate()).padStart(2, '0');
+  const timeMax = `${y2}-${m2}-${d2}T00:00:00+09:00`;
+  return { timeMin, timeMax };
 };
 
 const listNonTimeupCalendars = async (userId) => {
@@ -118,6 +122,7 @@ const listEventsForCalendar = async (
         orderBy: 'startTime',
         maxResults: 100,
         pageToken,
+        timeZone: 'Asia/Seoul',
       });
       all.push(...(res.data.items || []));
       pageToken = res.data.nextPageToken;
@@ -178,11 +183,11 @@ export const fetchGoogleMonthlyMarkers = async (userId, year, month) => {
 };
 
 // 일별 조회
-export const fetchGoogleDailySchedules = async (userId, yyyyMmDd) => {
+export const fetchGoogleDailySchedules = async (userId, date) => {
   try {
     const auth = await createOAuthClientForUser(userId);
     const calendar = google.calendar({ version: 'v3', auth });
-    const { timeMin, timeMax } = getDayRange(yyyyMmDd);
+    const { timeMin, timeMax } = getDayRange(date);
     const calendars = await listNonTimeupCalendars(userId);
 
     const googleSchedules = [];
@@ -196,7 +201,7 @@ export const fetchGoogleDailySchedules = async (userId, yyyyMmDd) => {
       );
 
       for (const evt of events) {
-        const { start_date, end_date } = normalizeStartEndUTC(evt);
+        const { start_date, end_date } = normalizeStartEnd(evt);
         googleSchedules.push({
           schedule_id: evt.id, // DB 스케줄 아님
           name: evt.summary || '(제목 없음)',
