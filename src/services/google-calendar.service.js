@@ -178,11 +178,11 @@ export const fetchGoogleMonthlyMarkers = async (userId, year, month) => {
 };
 
 // 일별 조회
-export const fetchGoogleDailySchedules = async (userId, yyyyMmDd) => {
+export const fetchGoogleDailySchedules = async (userId, date) => {
   try {
     const auth = await createOAuthClientForUser(userId);
     const calendar = google.calendar({ version: 'v3', auth });
-    const { timeMin, timeMax } = getDayRange(yyyyMmDd);
+    const { timeMin, timeMax } = getDayRange(date);
     const calendars = await listNonTimeupCalendars(userId);
 
     const googleSchedules = [];
@@ -196,7 +196,7 @@ export const fetchGoogleDailySchedules = async (userId, yyyyMmDd) => {
       );
 
       for (const evt of events) {
-        const { start_date, end_date } = normalizeStartEndUTC(evt);
+        const { start_date, end_date } = normalizeStartEnd(evt);
         googleSchedules.push({
           schedule_id: evt.id, // DB 스케줄 아님
           name: evt.summary || '(제목 없음)',
