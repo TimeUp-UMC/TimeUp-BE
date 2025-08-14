@@ -3,6 +3,7 @@ import {
   UnauthorizedError,
   NotFoundError,
   InternalServerError,
+  ValidationError
 } from '../errors/error.js';
 import { fetchGoogleMonthlyMarkers } from '../services/google-calendar.service.js';
 
