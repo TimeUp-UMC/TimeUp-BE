@@ -128,6 +128,7 @@ model users {
   remind_is_vibrating   Boolean                     @default(true)
   remind_sound_id       Int                         @default(0)
   remind_vibration_type users_remind_vibration_type @default(default)
+  push_token            String?
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
