@@ -1,6 +1,6 @@
   import { bodyToSchedule } from '../dtos/schedule.dto.js';
   import { updateScheduleWithRules } from '../services/scheduleUpdate.service.js';
-  import { UnauthorizedError, InternalServerError, NotFoundError } from '../errors/error.js';
+  import { UnauthorizedError, InternalServerError, NotFoundError, ValidationError } from '../errors/error.js';
 
   // 일정 수정
 
