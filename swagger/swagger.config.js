@@ -49,6 +49,7 @@ export const swaggerSpec = {
       ...diarySwagger.components?.schemas,
     },
   },
+  security: [{ bearerAuth: [] }],
 };
 
 export const setupSwagger = (app) => {
