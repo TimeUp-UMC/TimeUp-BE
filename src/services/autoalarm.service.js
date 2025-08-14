@@ -183,8 +183,23 @@ export function calculateWakeupTime({
   };
 }
 
+async function addressToCoords(placeName) {
+  const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(
+    placeName
+  )}&inputtype=textquery&fields=geometry&key=${GOOGLE_API_KEY}`;
+
+  const res = await axios.get(url);
+  const candidate = res.data.candidates[0];
+
+  if (!candidate) throw new Error('장소를 찾을 수 없습니다.');
+  return {
+    lat: candidate.geometry.location.lat,
+    lng: candidate.geometry.location.lng,
+  };
+}
+
 //주소 위도/경도 변환
-async function addressToCoords(address) {
+async function addressToCoords_(address) {
   const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(
     address
   )}`;
@@ -241,10 +256,39 @@ export const addAutoAlarmService = async (dto) => {
     return; // 자동 알람 생성하지 않음
   }
   const scheduleStartDate = new Date(schedule.start_date);
+  console.log('home_address : ', home_address);
   const origin = await addressToCoords(home_address);
+  console.log('origin : ', origin);
+  console.log('schedule.address : ', schedule.address);
   const destination = await addressToCoords(schedule.address);
+  console.log('destination : ', destination);
   const feedbackScore = feedback;
 
+  let finalResult = null;
+  let departureDate, arrivalDate, durationSec, routeData;
+
+  for (let i = 0; i < preferredTransport.length; i++) {
+    const mode = preferredTransport[i];
+    const result = await getAccurateDepartureTime(
+      `${origin.lng},${origin.lat}`,
+      `${destination.lng},${destination.lat}`,
+      scheduleStartDate,
+      mode,
+      avg_ready_time
+    );
+
+    // 도보이고, 소요시간이 30분 이상이면 다음 수단으로
+    if (mode === 'walk' && result.durationSec >= 30 * 60) {
+      console.info(
+        `🚶 도보 ${Math.floor(result.durationSec / 60)}분 → 다음 모드`
+      );
+      continue;
+    }
+
+    ({ departureDate, arrivalDate, durationSec, routeData } = result);
+    break; // 유효한 결과면 루프 종료
+  }
+  /*
   const { departureDate, arrivalDate, durationSec, routeData } =
     await getAccurateDepartureTime(
       `${origin.lng},${origin.lat}`,
@@ -253,7 +297,7 @@ export const addAutoAlarmService = async (dto) => {
       preferredTransport,
       avg_ready_time
     );
-
+*/
   const wakeupTime = await getRecommendedWakeupTime(
     durationSec,
     avg_ready_time,
