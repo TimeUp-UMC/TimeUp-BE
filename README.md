@@ -90,11 +90,7 @@ src/
     
     URL 경로와 컨트롤러를 연결하는 라우터가 포함됩니다.
     
-    예: `/users` 경로에 대한 요청을 `UserController`로 전달.
-    
-- **`server.js`**
-    
-    서버 실행 파일로, `app.js`를 불러와 서버를 실행합니다.
+    예: `/users` 경로에 대한 요청을 `UserController`로 전달.  
     
 - **`services/`**
     
