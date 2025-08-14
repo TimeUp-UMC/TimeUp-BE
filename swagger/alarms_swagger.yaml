@@ -783,3 +783,122 @@ paths:
                     type: object
                     nullable: true
                     example: null
+  /alarm/{auto_alarm_id}/auto-mypage:
+    get:
+      tags:
+        - Alarms
+      summary: 자동 알람 설정값 조회 API(마이페이지)
+      responses:
+        '200':
+          description: 자동 알람 설정값 조회 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        vibration_type": 
+                          type: enum,
+                          example: "short1"
+                        "sound_id": 
+                          type: int,
+                          exapme: 2
+                        "repeat_interval": 
+                          type: int,
+                          example: 0,
+                        "repeat_count": 
+                          type: int,
+                          example: 0
+        '400':
+          description: 자동 알람 설정값 조회 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A004
+                      reason:
+                        type: string
+                        example: "알람 조회에 실패했습니다."
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+  /alarm/push-token:
+    post:
+      tags:
+        - Alarms
+      summary: 푸시 토큰 저장 API
+      responses:
+        '200':
+          description: 푸시 토큰 저장 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        expo_push_token:
+                          type: string
+                          example: "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+        '400':
+          description: 푸시 토큰 저장 실패 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: A005
+                      reason:
+                        type: string
+                        example: "유효하지 않은 푸시 토큰입니다."
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
