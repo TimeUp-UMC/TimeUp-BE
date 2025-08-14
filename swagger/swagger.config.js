@@ -38,6 +38,9 @@ export const swaggerSpec = {
     ...diarySwagger.paths,
   },
   components: {
+    securitySchemes: {
+      bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+    },
     schemas: {
       ...userSwagger.components?.schemas,
       ...authSwagger.components?.schemas,
@@ -46,6 +49,7 @@ export const swaggerSpec = {
       ...diarySwagger.components?.schemas,
     },
   },
+  security: [{ bearerAuth: [] }],
 };
 
 export const setupSwagger = (app) => {
