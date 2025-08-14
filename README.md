@@ -41,7 +41,8 @@ src/
 │   └── responseMiddleware.js  # 표준 응답 미들웨어
 ├── repositories/           # 데이터베이스와의 상호작용 (저장소)
 │   └── text                # 예시 저장소 파일
-├── server.js               # 서버 실행 파일
+├── router.js               # 라우터 정의 파일  
+│   └── text                # 예시 라우터 파일
 ├── services/               # 비즈니스 로직 (서비스)
 │   └── text                # 예시 서비스 파일
 └── utils/                  # 유틸리티 함수 (공통 함수)
