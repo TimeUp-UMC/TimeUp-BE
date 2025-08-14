@@ -219,6 +219,7 @@ export const fetchGoogleDailySchedules = async (userId, date) => {
   }
 };
 
+// 자동 알람 계산을 위해 장소 데이터 추가
 export const fetchGoogleDailySchedule_alarm = async (userId, date) => {
   try {
     const auth = await createOAuthClientForUser(userId);

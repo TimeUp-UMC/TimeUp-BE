@@ -183,6 +183,7 @@ export function calculateWakeupTime({
   };
 }
 
+//주소 위도/경도 변환 - 구글
 async function addressToCoords(placeName) {
   const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(
     placeName
@@ -198,8 +199,8 @@ async function addressToCoords(placeName) {
   };
 }
 
-//주소 위도/경도 변환
-async function addressToCoords_(address) {
+//주소 위도/경도 변환 - 카카오
+async function addressToCoords_kakao(address) {
   const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(
     address
   )}`;
