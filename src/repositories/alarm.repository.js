@@ -40,7 +40,6 @@ export const findAutoAlarmsDueNow = async () => {
         lt: oneMinuteLater,
       },
     },
-    include: { user: true },
   });
 };
 
