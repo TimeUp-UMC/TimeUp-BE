@@ -2,6 +2,7 @@ import express from 'express';
 import {
   deleteAccount,
   loginWithGoogle,
+  loginWithGoogleMaster,
   logout,
   onboarding,
   refreshToken,
@@ -10,6 +11,7 @@ import {
 const router = express.Router();
 
 router.post('/login/google', loginWithGoogle);
+router.post('/login/master', loginWithGoogleMaster);
 router.post('/refresh', refreshToken);
 router.post('/logout', logout);
 router.post('/onboarding', onboarding);
