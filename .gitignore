@@ -4,5 +4,8 @@ node_modules
 # Keep environment variables out of version control
 .env
 prisma/migrations
+
 package-lock.json
 /src/generated/prisma
+
+timeup-key-pair.pem

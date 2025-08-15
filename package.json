@@ -17,19 +17,23 @@
     "axios": "^1.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
     "dotenv": "^17.2.0",
     "express": "^5.0.0",
-    "express-session": "^1.18.1",
+    "express-session": "^1.18.2",
+    "googleapis": "^155.0.1",
     "http-status-codes": "^2.3.0",
     "ioredis": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.1",
+    "node-cron": "^4.2.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "jest": "^30.0.5",
     "nodemon": "^3.1.10",
     "prisma": "^6.12.0"
   }

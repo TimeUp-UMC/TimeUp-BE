@@ -62,7 +62,6 @@ export const createAutoAlarmDTO = (user_id, body) => {
   export const getMPAutoAlarmDTO = (AutoAlarm, ATalarmId) => {
     return {
       user_id: AutoAlarm.user_id,
-      auto_alarm_id: ATalarmId,
       vibration_type: AutoAlarm.vibration_type,
       sound_id: AutoAlarm.sound_id,
       repeat_interval: AutoAlarm.repeat_interval,
