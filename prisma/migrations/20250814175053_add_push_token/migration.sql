@@ -3,9 +3,6 @@ ALTER TABLE `schedules` MODIFY `created_at` TIMESTAMP(0) NULL DEFAULT CURRENT_TI
     ALTER COLUMN `updated_at` DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE `users` ADD COLUMN `push_token` VARCHAR(191) NULL;
-
--- AlterTable
 ALTER TABLE `wakeup_feedbacks` MODIFY `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0);
 
 -- AddForeignKey
