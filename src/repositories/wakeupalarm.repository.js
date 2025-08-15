@@ -1,14 +1,5 @@
 import { prisma } from "../db.config.js";
 
-// 기상 알람 등록
-/*
-export const addWakeUpAlarmToDB = async (WakeUpalarmData) => {
-  const newAlarm = await pool.wakeup_alarms.create({
-    data: WakeUpalarmData,
-  });
-  return newAlarm;
-};*/
-
 // 기상 알람 수정 + 비활성화
 export const updateWakeUpAlarmInDB = async (WUalarmId, WakeUpalarmData) => {
   const updatedWakeUpAlarm = await prisma.wakeup_alarms.update({

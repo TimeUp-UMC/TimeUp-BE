@@ -6,38 +6,6 @@ import { updatedWakeUpAlarmService } from "../services/wakeupalarm.service.js";
 import { StatusCodes } from "http-status-codes";
 import { prisma } from"../db.config.js";
 
-/*
-// 기상 알람 등록
-export const addWakeUpAlarm = async (req, res, next) => {
-  try {
-    const tokenId = req.headers.authorization?.split(' ')[1];
-
-    if (!tokenId) throw new UnauthorizedError('발행된 토큰이 없습니다');
-
-    // token_id로 사용자 정보 조회
-    const tokenWithUser = await prisma.token.findUnique({
-      where: { token_id: tokenId },
-      include: { user: true },
-    });
-
-    const userProfile = tokenWithUser?.user;
-    if (!userProfile?.wakeTime) {
-      throw new BusinessLogicError('사용자의 기상 시간이 설정되어 있지 않습니다. 마이페이지에서 먼저 기상 시간을 설정해주세요.','A001');
-    }
-
-    // DTO 생성
-    const dto = createWakeUpDTO(req.body, userProfile);
-
-    // 서비스 호출
-    const newWakeUpAlarm = await addWakeUpAlarmService(dto);
-
-    return res.success(newWakeUpAlarm);
-  } catch (error) {
-    next(error);
-  }
-};
-*/
-
 // 기상 알람 수정
 export const updateWakeUpAlarm = async (req, res, next) => {
   try {
