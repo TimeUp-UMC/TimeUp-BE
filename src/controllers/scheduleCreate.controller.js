@@ -45,6 +45,7 @@ export const handleCreateSchedule = async (req, res, next) => {
       200
     );
   } catch (error) {
+    console.error(error);
     if (
       error instanceof ValidationError ||
       error instanceof UnauthorizedError
