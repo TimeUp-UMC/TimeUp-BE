@@ -14,8 +14,6 @@ export const getAllAlarm = async (req, res, next) => {
     // 토큰 확인 및 user_id
     const userId = req.user?.user_id;
 
-    console.log('user_id:', userId);
-
     // token_id로 사용자 정보 조회
     const exsitingUser = await prisma.users.findUnique({
       where: { user_id: userId },
@@ -33,7 +31,7 @@ export const getAllAlarm = async (req, res, next) => {
     if (!MyAlarm) return MyAlarm;
     const AutoAlarm = await getAutoAlarmByUserId(userId); // 자동 알람
     if (!AutoAlarm) return AutoAlarm;
-    console.log('autoalarm data: ', AutoAlarm);
+    //console.log('autoalarm data: ', AutoAlarm);
 
     // DTO 생성
     const WakeUpAlarmData = WakeUpAlarm.map(getWakeUpAlarmDTO); // 기상 알람

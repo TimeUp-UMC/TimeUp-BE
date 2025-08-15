@@ -3,7 +3,6 @@ dotenv.config();
 
 import {
   updateAutoAlarmInDB,
-  getscheduleInDB,
   getAutoAlarmInDB,
   findAutoDataById,
   createAutoAlarmInDB,
@@ -21,10 +20,11 @@ export const updatedAutoAlarmService = async (ATalarmId, dto) => {
 
 // 자동 알람 조회
 export const getAutoAlarmByUserId = async (userId) => {
-  const schedules = await getscheduleInDB(userId);
-  const scheduleIds = schedules.map((s) => s.schedule_id);
-
-  return await getAutoAlarmInDB(scheduleIds);
+  // const schedules = await getscheduleInDB(userId);
+  // const scheduleIds = schedules.map((s) => s.schedule_id);
+  const autoAlarm = await getAutoAlarmInDB(userId);
+  //console.log('autoAlarm : ', autoAlarm);
+  return autoAlarm;
 };
 
 // ISO 문자열 -> Unix timestamp (초)
@@ -238,8 +238,8 @@ function formatDateTime(date) {
 }
 
 // 자동 알람 등록
-export const addAutoAlarmService = async (dto) => {
-  const { userId } = dto;
+export const addAutoAlarmService = async (userId) => {
+  // const userId = dto.userId;
 
   const autoData = await findAutoDataById(userId);
   if (!autoData) throw new Error('자동 알람 데이터를 찾을 수 없습니다.');
@@ -257,12 +257,8 @@ export const addAutoAlarmService = async (dto) => {
     return; // 자동 알람 생성하지 않음
   }
   const scheduleStartDate = new Date(schedule.start_date);
-  console.log('home_address : ', home_address);
   const origin = await addressToCoords(home_address);
-  console.log('origin : ', origin);
-  console.log('schedule.address : ', schedule.address);
   const destination = await addressToCoords(schedule.address);
-  console.log('destination : ', destination);
   const feedbackScore = feedback;
 
   let finalResult = null;
@@ -289,16 +285,6 @@ export const addAutoAlarmService = async (dto) => {
     ({ departureDate, arrivalDate, durationSec, routeData } = result);
     break; // 유효한 결과면 루프 종료
   }
-  /*
-  const { departureDate, arrivalDate, durationSec, routeData } =
-    await getAccurateDepartureTime(
-      `${origin.lng},${origin.lat}`,
-      `${destination.lng},${destination.lat}`,
-      scheduleStartDate,
-      preferredTransport,
-      avg_ready_time
-    );
-*/
   const wakeupTime = await getRecommendedWakeupTime(
     durationSec,
     avg_ready_time,
@@ -310,13 +296,13 @@ export const addAutoAlarmService = async (dto) => {
   const createdAtKST = new Date(now.getTime() + 9 * 60 * 60 * 1000); // 9시간 더하기
 
   const alarmDTO = {
+    user_id: userId.userId,
     schedule_id: schedule.schedule_id,
     wakeup_time: wakeupTime,
     sound_id: 1,
     created_at: createdAtKST,
   };
-
-  const newAutoAlarm = await createAutoAlarmInDB(alarmDTO);
+  const newAutoAlarm = await createAutoAlarmInDB(userId, alarmDTO);
 
   return newAutoAlarm;
 };
