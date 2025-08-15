@@ -57,6 +57,7 @@ export const getMyalarmDTO = (MyAlarm) => {
 
   return {
     user_id: MyAlarm.userId,
+    my_alarm_id: MyAlarm.alarm_id,
     my_alarm_name: MyAlarm.my_alarm_name,
     my_alarm_time: date,
     is_active: MyAlarm.is_active

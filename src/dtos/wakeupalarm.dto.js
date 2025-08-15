@@ -44,6 +44,7 @@ export const activeWakeUpAlarmDTO = (userId, currentState) => {
 export const getWakeUpAlarmDTO = (WakeUpAlarm) => {
   return {
     user_id: WakeUpAlarm.userId,
+    wakeup_alarm_id: WakeUpAlarm.wakeup_alarm_id,
     wakeup_time: WakeUpAlarm.wakeup_time,
     is_active: WakeUpAlarm.is_active,
     day: WakeUpAlarm.day
