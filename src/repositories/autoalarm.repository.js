@@ -3,19 +3,20 @@ import { fetchGoogleDailySchedule_alarm } from '../services/google-calendar.serv
 
 export const findAutoDataById = async (userId) => {
   const now = new Date();
-  const createdAtKST = new Date(now.getTime() + 9 * 60 * 60 * 1000); // 9시간 더하기
-  const tomorrowStart = new Date(createdAtKST);
-  tomorrowStart.setDate(createdAtKST.getDate() + 1);
-  tomorrowStart.setUTCHours(0, 0, 0, 0);
-  const dbtomorrowStart = new Date(
-    tomorrowStart.getTime() - 9 * 60 * 60 * 1000
-  ); // 9시간 빼기 -> UTC 기준
-  const dbtomorrowEnd = new Date(
-    dbtomorrowStart.getTime() + 24 * 60 * 60 * 1000 - 1
-  ); // -> UTC 기준
+  // KST 기준 내일 00:00:00
+  const DateKST = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const tomorrowStartKST = new Date(DateKST);
+  tomorrowStartKST.setDate(DateKST.getDate() + 1);
+  tomorrowStartKST.setHours(0, 0, 0, 0);
 
-  const tomorrowEnd = new Date(tomorrowStart);
-  tomorrowEnd.setUTCHours(23, 59, 59, 999);
+  // UTC 변환 (DB 저장용)
+  const dbtomorrowStart = new Date(
+    tomorrowStartKST.getTime() - 9 * 60 * 60 * 1000
+  );
+  const dbtomorrowEnd = new Date(
+    tomorrowStartKST.getTime() + 24 * 60 * 60 * 1000 - 1
+  );
+
   // 유저 기본 정보
   const user = await prisma.users.findUnique({
     where: { user_id: userId },
@@ -167,9 +168,42 @@ export const getscheduleInDB = async (userId) => {
   });
   return schedules;
 };
+// export const getAutoAlarmInDB = async (scheduleId) => {
+//   const autoAlarms = await prisma.auto_alarms.findMany({
+//     where: { schedule_id: { in: scheduleId } },
+//   });
+//   const sortedAlarms = await prisma.auto_alarms.findMany({
+//     orderBy: { wakeup_time: 'asc' },
+//   });
+//   return sortedAlarms;
+// };
+
 export const getAutoAlarmInDB = async (scheduleId) => {
-  const autoAlarm = await prisma.auto_alarms.findMany({
-    where: { schedule_id: { in: scheduleId } },
+  const now = new Date();
+  // KST 기준 내일 00:00:00
+  const DateKST = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const tomorrowStartKST = new Date(DateKST);
+  tomorrowStartKST.setDate(DateKST.getDate() + 1);
+  tomorrowStartKST.setHours(12, 0, 0, 0);
+
+  // UTC 변환 (DB 저장용)
+  const dbtomorrowStart = new Date(
+    tomorrowStartKST.getTime() - 9 * 60 * 60 * 1000
+  );
+  const dbtomorrowEnd = new Date(
+    tomorrowStartKST.getTime() + 24 * 60 * 60 * 1000 - 1
+  );
+  return prisma.auto_alarms.findMany({
+    where: {
+      schedule_id: { in: scheduleId },
+      wakeup_time: {
+        gte: dbtomorrowStart,
+
+        lte: dbtomorrowEnd,
+      },
+    },
+    orderBy: {
+      wakeup_time: 'asc',
+    },
   });
-  return autoAlarm;
 };
