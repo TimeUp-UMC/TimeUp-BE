@@ -203,7 +203,7 @@ export const fetchGoogleDailySchedules = async (userId, date) => {
       for (const evt of events) {
         const { start_date, end_date } = normalizeStartEnd(evt);
         googleSchedules.push({
-          schedule_id: evt.id, // DB 스케줄 아님
+          scheduleId: evt.id, // DB 스케줄 아님
           name: evt.summary || '(제목 없음)',
           start_date,
           end_date,
