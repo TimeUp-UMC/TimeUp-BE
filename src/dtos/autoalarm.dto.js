@@ -23,9 +23,9 @@ export const updateAutoAlarmDTO = (ATalarmId, body) => {
 };
 
 // 자동 알람 비활성화
-export const activeAutoAlarmDTO = (scheduleId, currentState) => {
+export const activeAutoAlarmDTO = (ATalarmId, currentState) => {
   return {
-    schedule_id: scheduleId,
+    auto_alarm_id: ATalarmId,
     is_active: !currentState, // 호출 시마다 상태를 반전시켜 반환
   };
 };

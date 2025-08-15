@@ -72,11 +72,9 @@ export const activationAutoAlarm = async (req, res, next) => {
     if (!existingAutoAlarm)
       throw new NotFoundError('해당 알람이 존재하지 않습니다.', '404');
 
-    const scheduleId = existingAutoAlarm.schedule_id;
-
     // DTO 생성
     const currentState = existingAutoAlarm.is_active;
-    const dto = activeAutoAlarmDTO(scheduleId, currentState);
+    const dto = activeAutoAlarmDTO(ATalarmId, currentState);
 
     // 서비스 호출
     const updateAutoAlarm = await updatedAutoAlarmService(ATalarmId, dto); // 수정과 동일
