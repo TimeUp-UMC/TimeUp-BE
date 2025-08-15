@@ -106,7 +106,7 @@ paths:
                 properties:
                   message:
                     type: string
-    /users/me/auto-alarm-feedback:
+  /users/me/auto-alarm-feedback:
     post:
       tags: [Users]
       summary: 자동 알람 피드백 제출
