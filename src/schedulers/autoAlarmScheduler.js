@@ -8,6 +8,7 @@ export function startAutoAlarmScheduler() {
   //분, 시, 일, 월, 요일
   cron.schedule('20 6 * * *', async () => {
     try {
+      console.log('auto alarm scheduler start');
       const userIds = await getAllUserIds();
       for (const userId of userIds) {
         await addAutoAlarmService({ userId });
