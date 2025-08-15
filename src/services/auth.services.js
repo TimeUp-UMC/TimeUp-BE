@@ -1,6 +1,10 @@
 import * as userRespository from '../repositories/auth.repositories.js';
 import { getGoogleUserInfo } from '../utils/googleAuth.js';
-import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
+import {
+  generateAccessToken,
+  generateMasterAccessToken,
+  generateRefreshToken,
+} from '../utils/jwt.js';
 import redis from '../redis.config.js';
 import {
   InternalServerError,
@@ -41,6 +45,57 @@ export const handleGoogleLogin = async ({
   });
 
   const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  await redis.set(
+    `refresh:${user.user_id}`,
+    refreshToken,
+    'EX',
+    7 * 24 * 60 * 60
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    isNew: user.isNew,
+    user: {
+      email: user.email,
+      name: user.name,
+    },
+  };
+};
+
+export const handleGoogleLoginMaster = async ({
+  googleAccessToken,
+  googleRefreshToken,
+}) => {
+  const googleProfile = await getGoogleUserInfo(googleAccessToken);
+
+  console.log(googleProfile);
+  const email = googleProfile.email;
+  const name = googleProfile.name;
+  const googleId = googleProfile.sub;
+
+  if (!email || !name) {
+    throw new ValidationError();
+  }
+
+  let user = await userRespository.findUserByEmail(email);
+
+  if (!user) {
+    user = await userRespository.createUser({
+      email,
+      name,
+    });
+  }
+
+  await userRespository.saveGoogleToken({
+    user_id: user.user_id,
+    access_token: googleAccessToken,
+    refresh_token: googleRefreshToken,
+  });
+
+  const accessToken = generateMasterAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
   await redis.set(

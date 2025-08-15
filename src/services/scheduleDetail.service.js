@@ -18,7 +18,7 @@ export const getScheduleDetailByScheduleId = async (scheduleId) => {
   }
 
   return {
-    schedule_id: baseSchedule.schedule_id,
+    scheduleId: baseSchedule.schedule_id,
     user_id: baseSchedule.user_id,
     name: baseSchedule.name,
     start_date: baseSchedule.start_date,
@@ -28,7 +28,7 @@ export const getScheduleDetailByScheduleId = async (scheduleId) => {
     address: baseSchedule.address,
     is_important: baseSchedule.is_important,
     is_reminding: baseSchedule.is_reminding,
-    reminder_minutes: remindRule?.remind_at ?? null,
+    reminder_at: remindRule?.remind_at ?? null,
     is_recurring: baseSchedule.is_recurring,
     recurrence_rule: recurrence_rule
       ? {

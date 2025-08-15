@@ -203,10 +203,52 @@ export const fetchGoogleDailySchedules = async (userId, date) => {
       for (const evt of events) {
         const { start_date, end_date } = normalizeStartEnd(evt);
         googleSchedules.push({
+          scheduleId: evt.id, // DB 스케줄 아님
+          name: evt.summary || '(제목 없음)',
+          start_date,
+          end_date,
+          color: 'red',
+          url: evt.htmlLink,
+        });
+      }
+    }
+
+    return googleSchedules;
+  } catch (err) {
+    throw new BusinessLogicError(err?.message);
+  }
+};
+
+// 자동 알람 계산을 위해 장소 데이터 추가
+export const fetchGoogleDailySchedule_alarm = async (userId, date) => {
+  try {
+    const auth = await createOAuthClientForUser(userId);
+    const calendar = google.calendar({ version: 'v3', auth });
+    const { timeMin, timeMax } = getDayRange(date);
+    const calendars = await listNonTimeupCalendars(userId);
+
+    const googleSchedules = [];
+
+    for (const cal of calendars) {
+      const events = await listEventsForCalendar(
+        calendar,
+        cal.id,
+        timeMin,
+        timeMax
+      );
+
+      for (const evt of events) {
+        const { start_date, end_date } = normalizeStartEnd(evt);
+
+        // 장소 정보 가져오기
+        const address = evt.location || '(장소 정보 없음)';
+
+        googleSchedules.push({
           schedule_id: evt.id, // DB 스케줄 아님
           name: evt.summary || '(제목 없음)',
           start_date,
           end_date,
+          address, // 장소 정보 추가
           color: 'red',
           url: evt.htmlLink,
         });

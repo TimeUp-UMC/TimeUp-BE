@@ -1,82 +1,471 @@
 paths:
-  /auth/sign-up:
+  /auth/login/google:
     post:
       tags:
         - Auth
-      summary: 회원 가입 API
+      summary: 구글 로그인
+      security: []
+      description: 구글에서 발급한 access_token, refresh_token을 받아 서비스용 액세스/리프레시 토큰을 발급합니다.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - access_token
+                - refresh_token
               properties:
-                email:
+                access_token:
                   type: string
-                name:
+                  description: 구글 액세스 토큰
+                  example: ya29.a0AfH6SMA...
+                refresh_token:
                   type: string
-                gender:
-                  type: string
-                birth:
-                  type: string
-                  format: date
-                address:
-                  type: string
-                detailAddress:
-                  type: string
-                phoneNumber:
-                  type: string
-                preferences:
-                  type: array
-                  items:
-                    type: number
+                  description: 구글 리프레시 토큰
+                  example: dfsfsfd
       responses:
         '200':
-          description: 회원 가입 성공 응답
+          description: 로그인 성공
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  resultType:
+                  result:
                     type: string
-                    example: SUCCESS
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        example: AAAAOJSWESvI4VNZsdAxwzcM8zv3tCvjhGAx2jRGyA6zKHOf6OOCoqFeqEl8y7FsrbzNtpGH2i4LV04UP7tMfYTuMTE
+                      refreshToken:
+                        type: string
+                        example: GPRYRz0VjgmtIrIipg5TDRXE6ykYNTdeHnjV2F27ucbhZj1mBXEEwGHbGFtUAiszt4B35JJz38T6lcP5tGDipv7iiOy76FntUQEZ0lUQ2BKii98SIgEWufqUvqVZH55WUNwWo
+                      expiresIn:
+                        type: integer
+                        example: 360000
+                      isNew:
+                        type: boolean
+                        example: true
+                      user:
+                        type: object
+                        properties:
+                          email:
+                            type: string
+                            example: abc@gmail.com
+                          name:
+                            type: string
+                            example: 가나디
                   error:
                     type: object
                     nullable: true
                     example: null
-                  success:
-                    type: object
-                    properties:
-                      email:
-                        type: string
-                      name:
-                        type: string
-                      preferCategory:
-                        type: array
-                        items:
-                          type: string
-        '400':
-          description: 회원 가입 실패 응답
+        '401':
+          description: 유효하지 않은 토큰
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  resultType:
+                  result:
                     type: string
-                    example: FAIL
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
                   error:
                     type: object
                     properties:
                       errorCode:
                         type: string
-                        example: U001
-                      reason:
+                        example: ValidationError
+                      message:
                         type: string
-                      data:
-                        type: object
+                        example: 유효하지 않은 토큰입니다.
+
+  /auth/onboarding:
+    post:
+      tags:
+        - Auth
+      summary: 온보딩 API
+      description: 사용자 기본 정보 및 선호 교통수단, 기상 시간 등을 설정하는 API입니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - birth
+                - job
+                - preferences
+                - avg_ready_time
+                - duration_time
+                - home_address
+                - work_address
+                - wakeup_time
+              properties:
+                birth:
+                  type: integer
+                  example: 2025
+                job:
+                  type: string
+                  enum:
+                    [
+                      worker,
+                      public_officer,
+                      self_employed,
+                      freelancer,
+                      student,
+                      unemployed,
+                      other,
+                    ]
+                  example: worker
+                preferences:
+                  type: array
+                  items:
+                    type: object
+                    required: [priority, transportType]
+                    properties:
+                      priority:
+                        type: integer
+                        example: 1
+                      transportType:
+                        type: string
+                        enum: [bus, subway, car, walk]
+                        example: bus
+                avg_ready_time:
+                  type: integer
+                  example: 30
+                duration_time:
+                  type: integer
+                  example: 60
+                home_address:
+                  type: string
+                  nullable: true
+                  example: 서울특별시 서대문구 이화여대길 52
+                work_address:
+                  type: string
+                  nullable: true
+                  example: 서울특별시 서대문구 이화여대길 52
+                wakeup_time:
+                  type: object
+                  additionalProperties:
+                    type: string
+                    example: '07:00:00'
+      responses:
+        '200':
+          description: 온보딩 완료
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 온보딩 완료
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '400':
+          description: 잘못된 요청 (유효하지 않은 요일 키 등)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 400
                   success:
                     type: object
                     nullable: true
                     example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: BusinessLogicError
+                      message:
+                        type: string
+                        example: 유효하지 않은 요일 키
+        '401':
+          description: 유효하지 않은 토큰
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: 유효하지 않은 토큰입니다.
+
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: 토큰 재발급
+      security: []
+      description: 리프레시 토큰을 이용하여 새로운 액세스 토큰과 리프레시 토큰을 발급합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: your-refresh-token
+      responses:
+        '200':
+          description: 토큰 재발급 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        example: AAAAOJSWESvI4VNZsdAxwzcM8zv3tCvjhGAx2jRGyA6zKHOf6OOCoqFeqEl8y7FsrbzNtpGH2i4LV04UP7tMfYTuMTE
+                      refreshToken:
+                        type: string
+                        example: GPRYRz0VjgmtIrIipg5TDRXE6ykYNTdeHnjV2F27ucbhZj1mBXEEwGHbGFtUAiszt4B35JJz38T6lcP5tGDipv7iiOy76FntUQEZ0lUQ2BKii98SIgEWufqUvqVZH55WUNwWo
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '401':
+          description: 유효하지 않은 리프레시 토큰 또는 불일치
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: Invalid refresh token.
+              examples:
+                InvalidRefreshToken:
+                  summary: 잘못된 리프레시 토큰
+                  value:
+                    result: Fail
+                    status: 401
+                    success: null
+                    error:
+                      errorCode: ValidationError
+                      message: Invalid refresh token.
+                RefreshTokenMismatch:
+                  summary: 리프레시 토큰 불일치
+                  value:
+                    result: Fail
+                    status: 401
+                    success: null
+                    error:
+                      errorCode: ValidationError
+                      message: Refresh token mismatch.
+        '404':
+          description: 사용자를 찾을 수 없음
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 404
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: User not found.
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: 로그아웃 API
+      description: Redis에 저장된 리프레시 토큰을 삭제하여 로그아웃합니다.
+      responses:
+        '200':
+          description: 로그아웃 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 로그아웃 되었습니다.
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '401':
+          description: 유효하지 않은 토큰
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: 유효하지 않은 토큰입니다.
+  /auth/signout:
+    delete:
+      tags:
+        - Auth
+      summary: 회원 탈퇴 API
+      description: 액세스 토큰을 사용하여 회원을 탈퇴 처리합니다.
+      responses:
+        '200':
+          description: 회원 탈퇴 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 회원탈퇴 되었습니다.
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '401':
+          description: 유효하지 않은 토큰
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: 유효하지 않은 토큰입니다.

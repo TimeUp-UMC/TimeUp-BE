@@ -1,38 +1,84 @@
 paths:
-  /schedules/sign-up:
+  /schedules:
     post:
       tags:
         - Schedules
-      summary: 회원 가입 API
+      summary: 일정 등록 API
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - name
+                - start_date
+                - end_date
+                - color
+                - place_name
+                - address
+                - is_important
+                - is_reminding
+                - is_recurring
               properties:
-                email:
-                  type: string
                 name:
                   type: string
-                gender:
+                start_date:
                   type: string
-                birth:
+                  format: date-time
+                end_date:
                   type: string
-                  format: date
+                  format: date-time
+                color:
+                  type: string
+                  enum: [red, orange, yellow, green, blue, purple, gray, pink]
+                place_name:
+                  type: string
                 address:
                   type: string
-                detailAddress:
+                is_important:
+                  type: boolean
+                is_reminding:
+                  type: boolean
+                remind_at:
+                  type: integer
+                  enum: [0, 5, 10, 30, 60, 1440]
+                is_recurring:
+                  type: boolean
+                recurrence_rule:
+                  type: object
+                  properties:
+                    repeat_type:
+                      type: string
+                      enum: [weekly, monthly]
+                    repeat_weekdays:
+                      type: array
+                      items:
+                        type: integer
+                    monthly_option:
+                      type: string
+                      enum: [day_of_month, nth_weekday]
+                    day_of_month:
+                      type: integer
+                    nth_week:
+                      type: integer
+                    weekday:
+                      type: integer
+                    repeat_mode:
+                      type: string
+                      enum: [count, until]
+                    repeat_count:
+                      type: integer
+                    repeat_until_date:
+                      type: string
+                      format: date
+                memo:
                   type: string
-                phoneNumber:
-                  type: string
-                preferences:
-                  type: array
-                  items:
-                    type: number
       responses:
         '200':
-          description: 회원 가입 성공 응답
+          description: 일정 등록 성공 응답
           content:
             application/json:
               schema:
@@ -48,16 +94,14 @@ paths:
                   success:
                     type: object
                     properties:
-                      email:
+                      message:
                         type: string
-                      name:
-                        type: string
-                      preferCategory:
-                        type: array
-                        items:
-                          type: string
+                        example: 일정이 등록되었습니다.
+                      schedule_id:
+                        type: integer
+                        example: 27
         '400':
-          description: 회원 가입 실패 응답
+          description: 잘못된 요청 바디 또는 필수 값 누락
           content:
             application/json:
               schema:
@@ -71,12 +115,1337 @@ paths:
                     properties:
                       errorCode:
                         type: string
-                        example: U001
-                      reason:
+                        example: ValidationError
+                      message:
                         type: string
+                        example: 반복 요일은 최소 1개 이상 선택해야 합니다.
                       data:
                         type: object
                   success:
                     type: object
                     nullable: true
                     example: null
+        '401':
+          description: 토큰 인증 실패
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: UnauthorizedError
+                      message:
+                        type: string
+                        example: 유효하지 않은 액세스 토큰
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+        '500':
+          description: 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: InternalServerError
+                      message:
+                        type: string
+                        example: Internal Server Error
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+  /schedules/{scheduleId}:
+    put:
+      tags:
+        - Schedules
+      summary: 일정 수정 API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: 수정할 일정 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - start_date
+                - end_date
+                - color
+                - place_name
+                - address
+                - is_important
+                - is_reminding
+                - is_recurring
+              properties:
+                name:
+                  type: string
+                start_date:
+                  type: string
+                  format: date-time
+                end_date:
+                  type: string
+                  format: date-time
+                color:
+                  type: string
+                  enum: [red, orange, yellow, green, blue, purple, gray, pink]
+                place_name:
+                  type: string
+                address:
+                  type: string
+                is_important:
+                  type: boolean
+                is_reminding:
+                  type: boolean
+                remind_at:
+                  type: integer
+                  enum: [0, 5, 10, 30, 60, 1440]
+                is_recurring:
+                  type: boolean
+                repeat_type:
+                  type: string
+                  enum: [weekly, monthly]
+                repeat_weekdays:
+                  type: array
+                  items:
+                    type: integer
+                monthly_option:
+                  type: string
+                  enum: [day_of_month, nth_weekday]
+                day_of_month:
+                  type: integer
+                nth_week:
+                  type: integer
+                weekday:
+                  type: integer
+                repeat_mode:
+                  type: string
+                  enum: [count, until]
+                repeat_count:
+                  type: integer
+                repeat_until_date:
+                  type: string
+                  format: date
+                memo:
+                  type: string
+      responses:
+        '200':
+          description: 일정 수정 성공 응답
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 일정이 수정되었습니다.
+                      schedule_id:
+                        type: integer
+                        example: 35
+        '400':
+          description: 잘못된 요청 바디 또는 필수 값 누락
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: 필수 일정 정보가 누락되었습니다.
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+        '401':
+          description: 토큰 인증 실패
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: UnauthorizedError
+                      message:
+                        type: string
+                        example: 유효하지 않은 액세스 토큰
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+        '404':
+          description: 해당 일정이 존재하지 않음
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: NotFoundError
+                      message:
+                        type: string
+                        example: 해당 일정이 존재하지 않습니다.
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+        '500':
+          description: 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: FAIL
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: InternalServerError
+                      message:
+                        type: string
+                        example: Internal Server Error
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+  /schedules/{scheduleId}:
+    delete:
+      tags:
+        - Schedules
+      summary: 일정 삭제 API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: scheduleId
+          required: true
+          schema:
+            type: integer
+          description: 삭제할 일정의 ID 
+      responses:
+        '200':
+          description: 일정 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 일정이 삭제되었습니다.
+                      schedule_id:
+                        type: integer
+                        example: 29
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '401':
+          description: 토큰 인증 실패
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: UnauthorizedError
+                      message:
+                        type: string
+                        example: 유효하지 않은 액세스 토큰
+        '404':
+          description: 해당 일정이 존재하지 않음
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 404
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: NotFoundError
+                      message:
+                        type: string
+                        example: 해당 일정이 존재하지 않습니다.
+        '500':
+          description: 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 500
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: InternalServerError
+                      message:
+                        type: string
+                        example: 서버 오류 발생
+  /schedules/monthly:
+    get:
+      tags:
+        - Schedules
+      summary: 월별 등록된 일정 목록 조회 API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: month
+          required: true
+          schema:
+            type: string
+            example: 2025-08
+          description: 조회할 연도와 월 (YYYY-MM 형식)
+      responses:
+        '200':
+          description: 월별 등록된 일정 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 조회하신 월별 일정 목록입니다.
+                      schedulesByDay:
+                        type: object
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              color:
+                                type: string
+                                example: pink
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+              example:
+                result: Success
+                status: 200
+                success:
+                  message: 조회하신 월별 일정 목록입니다.
+                  schedulesByDay:
+                    "2":
+                      - color: pink
+                      - color: blue
+                    "8":
+                      - color: pink
+                      - color: yellow
+                    "12":
+                      - color: blue
+                error: null
+        '400':
+          description: 잘못된 포맷 또는 누락
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 400
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: month 파라미터는 YYYY-MM 형식으로 입력해야 합니다.
+        '401':
+          description: 인증 토큰 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: UnauthorizedError
+                      message:
+                        type: string
+                        example: 유효하지 않은 액세스 토큰
+        '500':
+          description: 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 500
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: InternalServerError
+                      message:
+                        type: string
+                        example: Internal Server Error
+  /schedules/day:
+    get:
+      tags:
+        - Schedules
+      summary: 특정 날짜의 일정 목록 조회 API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            example: 2025-08-02
+          description: 조회할 날짜 (YYYY-MM-DD 형식)
+      responses:
+        '200':
+          description: 해당 날짜의 일정 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 조회하신 날짜의 일정 목록입니다.
+                      schedules:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            schedule_id:
+                              type: integer
+                              example: 25
+                            name:
+                              type: string
+                              example: HP Radio
+                            start_date:
+                              type: string
+                              format: date-time
+                              example: 2025-08-12T21:00:00.000Z
+                            end_date:
+                              type: string
+                              format: date-time
+                              example: 2025-08-12T23:00:00.000Z
+                            color:
+                              type: string
+                              example: blue
+                      googleSchedules:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            schedule_id:
+                              type: string
+                              example: 538b74idl147va883c444p7cs7
+                            name:
+                              type: string
+                              example: 테스트2
+                            start_date:
+                              type: string
+                              format: date-time
+                              example: 2025-08-18T01:00:00.000Z
+                            end_date:
+                              type: string
+                              format: date-time
+                              example: 2025-08-18T01:30:00.000Z
+                            color:
+                              type: string
+                              example: red
+                            url:
+                              type: string
+                              example: https://www.google.com/calendar/event?eid=asdfghhh
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '400':
+          description: 잘못된 날짜 형식 또는 누락
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 400
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: date 파라미터는 YYYY-MM-DD 형식으로 입력해야 합니다.
+        '401':
+          description: 인증 토큰 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: UnauthorizedError
+                      message:
+                        type: string
+                        example: 유효하지 않은 액세스 토큰
+        '403':
+          description: 접근 권한 없음
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 403
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ForbiddenError
+                      message:
+                        type: string
+                        example: 접근 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 500
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: InternalServerError
+                      message:
+                        type: string
+                        example: 서버 오류 발생
+  /schedules/{scheduleId}:
+    get:
+      tags:
+        - Schedules
+      summary: 일정 상세 조회 API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: scheduleId
+          required: true
+          schema:
+            type: integer
+          description: 조회할 일정의 ID
+      responses:
+        '200':
+          description: 조회한 일정 상세 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 조회하신 일정의 상세 정보입니다.
+                      schedule:
+                        type: object
+                        properties:
+                          schedule_id:
+                            type: integer
+                            example: 1
+                          user_id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 다꾸모임
+                          start_date:
+                            type: string
+                            format: date-time
+                            example: 2025-08-02T07:30:00.000Z
+                          end_date:
+                            type: string
+                            format: date-time
+                            example: 2025-08-02T08:30:00.000Z
+                          color:
+                            type: string
+                            example: pink
+                          place_name:
+                            type: string
+                            example: 콤포타블 커피 남산점
+                          address:
+                            type: string
+                            example: 서울 용산구 후암동 358-17
+                          is_important:
+                            type: boolean
+                            example: true
+                          is_reminding:
+                            type: boolean
+                            example: true
+                          reminder_minutes:
+                            type: integer
+                            example: 30
+                          is_recurring:
+                            type: boolean
+                            example: true
+                          recurrence_rule:
+                            type: object
+                            properties:
+                              recurrence_id:
+                                type: integer
+                                example: 1
+                              schedule_id:
+                                type: integer
+                                example: 1
+                              repeat_type:
+                                type: string
+                                example: weekly
+                              repeat_mode:
+                                type: string
+                                example: until
+                              repeat_count:
+                                type: integer
+                                nullable: true
+                                example: null
+                              repeat_until_date:
+                                type: string
+                                format: date-time
+                                example: 2025-09-30T00:00:00.000Z
+                              monthly_repeat_option:
+                                type: string
+                                nullable: true
+                                example: null
+                              day_of_month:
+                                type: integer
+                                nullable: true
+                                example: null
+                              nth_week:
+                                type: integer
+                                nullable: true
+                                example: null
+                              weekday:
+                                type: integer
+                                nullable: true
+                                example: null
+                              repeat_weekdays:
+                                type: array
+                                items:
+                                  type: integer
+                                example: []
+                          memo:
+                            type: string
+                            example: 나눠줄 스티커 챙기기
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '401':
+          description: 토큰 인증 실패
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: UnauthorizedError
+                      message:
+                        type: string
+                        example: 유효하지 않은 액세스 토큰
+        '404':
+          description: 해당 일정이 존재하지 않음
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 404
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: NotFoundError
+                      message:
+                        type: string
+                        example: 해당 일정을 찾을 수 없습니다.
+        '500':
+          description: 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 500
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: InternalServerError
+                      message:
+                        type: string
+                        example: 서버 오류 발생
+  /schedules/important:
+    get:
+      tags:
+        - Schedules
+      summary: 월별 주요 일정 조회 API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: month
+          required: true
+          schema:
+            type: string
+            example: 2025-07
+          description: 조회할 월 (YYYY-MM 형식)
+      responses:
+        '200':
+          description: 월별 주요 일정 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 조회하신 달의 주요 일정 목록입니다.
+                      schedules:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            schedule_id:
+                              type: integer
+                              example: 9
+                            name:
+                              type: string
+                              example: 회의
+                            start_date:
+                              type: string
+                              format: date-time
+                              example: 2025-08-02T05:00:00.000Z
+                            end_date:
+                              type: string
+                              format: date-time
+                              example: 2025-08-02T06:00:00.000Z
+                            color:
+                              type: string
+                              example: blue
+                            place_name:
+                              type: string
+                              example: 카페베네 강남점
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '400':
+          description: 잘못된 포맷 또는 누락
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 400
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: month 파라미터는 YYYY-MM 형식으로 입력해야 합니다.
+        '401':
+          description: 인증 토큰 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: UnauthorizedError
+                      message:
+                        type: string
+                        example: 유효하지 않은 액세스 토큰
+        '500':
+          description: 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 500
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: InternalServerError
+                      message:
+                        type: string
+                        example: Internal Server Error
+  /google/calendar/import:
+    get:
+      tags:
+        - Schedules
+      summary: 구글 캘린더 일정 가져오기 API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            example: 2025-07-08
+          description: 가져올 구글 일정 기준 날짜 (YYYY-MM-DD 형식)
+      responses:
+        '200':
+          description: 구글 캘린더에서 일정 가져오기 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 200
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 구글 일정을 성공적으로 가져왔습니다.
+                      schedules:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            external_id:
+                              type: string
+                              example: gcal_230
+                            name:
+                              type: string
+                              example: 화상 회의
+                            start_time:
+                              type: string
+                              example: "09:00"
+                            end_time:
+                              type: string
+                              example: "10:00"
+                            location:
+                              type: string
+                              example: Google Meet
+                            calendar_name:
+                              type: string
+                              example: 업무 캘린더
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '400':
+          description: 잘못된 date 포맷 또는 누락
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 400
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: date 파라미터는 YYYY-MM-DD 형식이어야 합니다.
+        '401':
+          description: 엑세스 토큰 오류 또는 연동 실패
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: AuthenticationError
+                      message:
+                        type: string
+                        example: Google 계정이 연동되어 있지 않습니다.
+        '500':
+          description: 서버 내부 오류 or Google API 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 500
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ExternalApiError
+                      message:
+                        type: string
+                        example: Google 서버 오류 또는 통신 실패
+  /google/calendar/export:
+    post:
+      tags:
+        - Schedules
+      summary: 구글 캘린더 일정 등록 API
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - schedule_id
+                - name
+                - start_datetime
+                - end_datetime
+              properties:
+                schedule_id:
+                  type: integer
+                  example: 102
+                name:
+                  type: string
+                  example: 발표 리허설
+                start_datetime:
+                  type: string
+                  format: date-time
+                  example: 2025-07-08T14:00:00
+                end_datetime:
+                  type: string
+                  format: date-time
+                  example: 2025-07-08T15:30:00
+                location:
+                  type: string
+                  example: 이화여자대학교
+                description:
+                  type: string
+                  example: 발표자료 확인 필수
+      responses:
+        '201':
+          description: 구글 캘린더에 일정 등록 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Success
+                  status:
+                    type: integer
+                    example: 201
+                  success:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 구글 캘린더에 일정이 등록되었습니다.
+                      external_id:
+                        type: string
+                        example: gcal_102
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+        '400':
+          description: 잘못된 필드 값 또는 누락
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 400
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: name, start_datetime, end_datetime는 필수입니다.
+        '401':
+          description: 인증 실패 또는 구글 연동 안됨
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 401
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: AuthenticationError
+                      message:
+                        type: string
+                        example: Google 계정이 연동되어 있지 않습니다.
+        '500':
+          description: 서버 오류 또는 외부 API 실패
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: Fail
+                  status:
+                    type: integer
+                    example: 500
+                  success:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: object
+                    properties:
+                      errorCode:
+                        type: string
+                        example: ExternalApiError
+                      message:
+                        type: string
+                        example: Google Calendar 등록 중 오류가 발생했습니다.

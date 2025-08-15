@@ -25,6 +25,26 @@ export const loginWithGoogle = async (req, res) => {
   }
 };
 
+export const loginWithGoogleMaster = async (req, res) => {
+  console.log('마스터 로그인을 요청했습니다.');
+  const { access_token, refresh_token } = req.body;
+
+  if (!access_token) {
+    throw new ValidationError();
+  }
+
+  try {
+    const result = await authService.handleGoogleLoginMaster({
+      googleAccessToken: access_token,
+      googleRefreshToken: refresh_token,
+    });
+    res.success(result);
+  } catch (err) {
+    console.log('Login failed', err.message);
+    throw new ValidationError();
+  }
+};
+
 export const refreshToken = async (req, res) => {
   try {
     const { refresh_token } = req.body;
@@ -65,7 +85,7 @@ export const onboarding = async (req, res) => {
     res.success({ message: '온보딩 완료' });
   } catch (err) {
     console.error('온보딩 실패', err);
-    throw new InternalServerError(err);
+    throw err;
   }
 };
 
