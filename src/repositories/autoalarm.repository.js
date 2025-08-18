@@ -1,17 +1,29 @@
 import { prisma } from '../db.config.js';
+import { fetchGoogleDailySchedule_alarm } from '../services/google-calendar.service.js';
 
-export const findAutoDataById = async (userId) => {
+export const findAutoDataById = async (userObj) => {
+  const userId = userObj.userId;
   const now = new Date();
-  const createdAtKST = new Date(now.getTime() + 9 * 60 * 60 * 1000); // 9시간 더하기
-  const tomorrowStart = new Date(createdAtKST);
-  tomorrowStart.setDate(createdAtKST.getDate() + 1);
-  tomorrowStart.setUTCHours(0, 0, 0, 0);
+  // KST 기준 내일 00:00:00
+  const DateKST = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const tomorrowStartKST = new Date(DateKST);
+  tomorrowStartKST.setDate(DateKST.getDate() + 1);
+  tomorrowStartKST.setHours(0, 0, 0, 0);
 
-  const tomorrowEnd = new Date(tomorrowStart);
-  tomorrowEnd.setUTCHours(23, 59, 59, 999);
-  // 1. 유저 기본 정보
+  // UTC 변환 (DB 저장용)
+  const dbtomorrowStart = new Date(
+    tomorrowStartKST.getTime() - 9 * 60 * 60 * 1000
+  );
+  const dbtomorrowEnd = new Date(
+    tomorrowStartKST.getTime() + 24 * 60 * 60 * 1000 - 1
+  );
+
+  // 유저 기본 정보
+
+  console.log('userId:', userId);
+
   const user = await prisma.users.findUnique({
-    where: { user_id: userId },
+    where: { user_id: Number(userId) },
     select: {
       avg_ready_time: true,
       home_address: true,
@@ -22,13 +34,13 @@ export const findAutoDataById = async (userId) => {
     throw new Error('User not found');
   }
 
-  // 2. 해당 유저의 내일 스케줄 중 가장 빠른 것 하나
-  const schedule = await prisma.schedules.findFirst({
+  // 해당 유저의 내일 스케줄 중 가장 빠른 것 하나
+  const dbSchedule = await prisma.schedules.findFirst({
     where: {
       user_id: userId,
       start_date: {
-        gte: tomorrowStart,
-        lte: tomorrowEnd,
+        gte: dbtomorrowStart,
+        lte: dbtomorrowEnd,
       },
     },
     orderBy: {
@@ -42,8 +54,40 @@ export const findAutoDataById = async (userId) => {
       address: true,
     },
   });
+  // 구글 캘린더 스케줄
+  const yyyyMmDd = dbtomorrowStart.toISOString().split('T')[0]; // YYYY-MM-DD
+  const googleSchedules = await fetchGoogleDailySchedule_alarm(
+    userId,
+    yyyyMmDd
+  );
 
-  // 3. 해당 유저의 최근 피드백 5개
+  // 내일 범위에 속하는 구글 일정만 필터
+  const tomorrowSchedules = googleSchedules.filter((s) => {
+    const startDate = new Date(s.start_date);
+    return startDate >= dbtomorrowStart && startDate <= dbtomorrowEnd;
+  });
+
+  // 가장 빠른 일정 하나만 선택
+  let googleSchedule = null;
+  if (tomorrowSchedules.length > 0) {
+    tomorrowSchedules.sort(
+      (a, b) => new Date(a.start_date) - new Date(b.start_date)
+    );
+    googleSchedule = tomorrowSchedules[0];
+  }
+
+  // DB vs Google 중 더 빠른 일정 선택
+  let schedule = null;
+  if (dbSchedule && googleSchedule) {
+    schedule =
+      new Date(dbSchedule.start_date) < new Date(googleSchedule.start_date)
+        ? dbSchedule
+        : googleSchedule;
+  } else {
+    schedule = dbSchedule || googleSchedule;
+  }
+
+  // 해당 유저의 최근 피드백 5개
   const feedbacks = await prisma.wakeup_feedbacks.findMany({
     where: {
       user_id: userId,
@@ -60,18 +104,20 @@ export const findAutoDataById = async (userId) => {
     },
   });
 
-  // 4. 가장 선호하는 교통수단
-  const preferredTransport = await prisma.user_preference_transport.findFirst({
+  // 가장 선호하는 교통수단 순서대로 배열 조회
+  const preferredTransports = await prisma.user_preference_transport.findMany({
     where: {
       user_id: userId,
     },
     orderBy: {
-      priority: 'asc', // 가장 높은 우선순위 (1)
+      priority: 'asc',
     },
     select: {
       transport: true,
     },
   });
+
+  const transportList = preferredTransports.map((t) => t.transport);
 
   // time_rating 평균 계산
   let feedback;
@@ -86,18 +132,19 @@ export const findAutoDataById = async (userId) => {
   return {
     ...user,
     schedule,
-    preferredTransport: preferredTransport?.transport ?? 'bus',
+    preferredTransport: transportList.length > 0 ? transportList : ['bus'],
     feedback,
   };
 };
 
 // 자동 알람 등록
-export async function createAutoAlarmInDB(dto) {
+export async function createAutoAlarmInDB(user_id, dto) {
   return await prisma.auto_alarms.create({
     data: {
+      user_id: dto.user_id,
       schedule_id: dto.schedule_id,
       wakeup_time: dto.wakeup_time,
-      sound_id: dto.sound_id || 1, // 기본값 지정
+      sound_id: dto.sound_id,
       created_at: dto.created_at,
     },
   });
@@ -119,16 +166,38 @@ export const findAutoAlarmById = async (ATalarmId) => {
 };
 
 // 자동 알람 조회
-export const getscheduleInDB = async (userId) => {
-  const schedules = await prisma.schedules.findMany({
-    where: { user_id: userId },
-    select: { schedule_id: true },
+export const getAutoAlarmInDB = async (user_id) => {
+  const now = new Date();
+
+  // 한국 시간(KST)으로 변환
+  const nowKST = new Date(now.getTime());
+
+  let startKST = new Date(nowKST);
+  let endKST = new Date(nowKST);
+
+  if (nowKST.getHours() < 12) {
+    // 정오 이전 → 오늘 00:00 ~ 11:59:59
+    startKST.setHours(0, 0, 0, 0);
+    endKST.setHours(11, 59, 59, 999);
+  } else {
+    // 정오 이후 → 내일 00:00 ~ 23:59:59
+    startKST.setDate(startKST.getDate() + 1);
+    startKST.setHours(0, 0, 0, 0);
+    endKST = new Date(startKST);
+    endKST.setHours(23, 59, 59, 999);
+  }
+
+  // UTC로 변환 (DB 저장 기준)
+  return prisma.auto_alarms.findMany({
+    where: {
+      user_id: user_id,
+      wakeup_time: {
+        gte: startKST,
+        lte: endKST,
+      },
+    },
+    orderBy: {
+      wakeup_time: 'asc',
+    },
   });
-  return schedules;
-};
-export const getAutoAlarmInDB = async (scheduleId) => {
-  const autoAlarm = await prisma.auto_alarms.findMany({
-    where: { schedule_id: { in: scheduleId } },
-  });
-  return autoAlarm;
 };

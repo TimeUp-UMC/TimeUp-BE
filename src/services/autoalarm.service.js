@@ -3,7 +3,6 @@ dotenv.config();
 
 import {
   updateAutoAlarmInDB,
-  getscheduleInDB,
   getAutoAlarmInDB,
   findAutoDataById,
   createAutoAlarmInDB,
@@ -21,10 +20,11 @@ export const updatedAutoAlarmService = async (ATalarmId, dto) => {
 
 // 자동 알람 조회
 export const getAutoAlarmByUserId = async (userId) => {
-  const schedules = await getscheduleInDB(userId);
-  const scheduleIds = schedules.map((s) => s.schedule_id);
-
-  return await getAutoAlarmInDB(scheduleIds);
+  // const schedules = await getscheduleInDB(userId);
+  // const scheduleIds = schedules.map((s) => s.schedule_id);
+  const autoAlarm = await getAutoAlarmInDB(userId);
+  //console.log('autoAlarm : ', autoAlarm);
+  return autoAlarm;
 };
 
 // ISO 문자열 -> Unix timestamp (초)
@@ -183,8 +183,24 @@ export function calculateWakeupTime({
   };
 }
 
-//주소 위도/경도 변환
-async function addressToCoords(address) {
+//주소 위도/경도 변환 - 구글
+async function addressToCoords(placeName) {
+  const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(
+    placeName
+  )}&inputtype=textquery&fields=geometry&key=${GOOGLE_API_KEY}`;
+
+  const res = await axios.get(url);
+  const candidate = res.data.candidates[0];
+
+  if (!candidate) throw new Error('장소를 찾을 수 없습니다.');
+  return {
+    lat: candidate.geometry.location.lat,
+    lng: candidate.geometry.location.lng,
+  };
+}
+
+//주소 위도/경도 변환 - 카카오
+async function addressToCoords_kakao(address) {
   const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(
     address
   )}`;
@@ -222,8 +238,8 @@ function formatDateTime(date) {
 }
 
 // 자동 알람 등록
-export const addAutoAlarmService = async (dto) => {
-  const { userId } = dto;
+export const addAutoAlarmService = async (userId) => {
+  // const userId = dto.userId;
 
   const autoData = await findAutoDataById(userId);
   if (!autoData) throw new Error('자동 알람 데이터를 찾을 수 없습니다.');
@@ -245,15 +261,30 @@ export const addAutoAlarmService = async (dto) => {
   const destination = await addressToCoords(schedule.address);
   const feedbackScore = feedback;
 
-  const { departureDate, arrivalDate, durationSec, routeData } =
-    await getAccurateDepartureTime(
+  let finalResult = null;
+  let departureDate, arrivalDate, durationSec, routeData;
+
+  for (let i = 0; i < preferredTransport.length; i++) {
+    const mode = preferredTransport[i];
+    const result = await getAccurateDepartureTime(
       `${origin.lng},${origin.lat}`,
       `${destination.lng},${destination.lat}`,
       scheduleStartDate,
-      preferredTransport,
+      mode,
       avg_ready_time
     );
 
+    // 도보이고, 소요시간이 30분 이상이면 다음 수단으로
+    if (mode === 'walk' && result.durationSec >= 30 * 60) {
+      console.info(
+        `🚶 도보 ${Math.floor(result.durationSec / 60)}분 → 다음 모드`
+      );
+      continue;
+    }
+
+    ({ departureDate, arrivalDate, durationSec, routeData } = result);
+    break; // 유효한 결과면 루프 종료
+  }
   const wakeupTime = await getRecommendedWakeupTime(
     durationSec,
     avg_ready_time,
@@ -265,13 +296,13 @@ export const addAutoAlarmService = async (dto) => {
   const createdAtKST = new Date(now.getTime() + 9 * 60 * 60 * 1000); // 9시간 더하기
 
   const alarmDTO = {
+    user_id: userId.userId,
     schedule_id: schedule.schedule_id,
     wakeup_time: wakeupTime,
     sound_id: 1,
     created_at: createdAtKST,
   };
-
-  const newAutoAlarm = await createAutoAlarmInDB(alarmDTO);
+  const newAutoAlarm = await createAutoAlarmInDB(userId, alarmDTO);
 
   return newAutoAlarm;
 };
