@@ -6,9 +6,21 @@ import { getAllUserIds } from '../repositories/user.repository.js';
 
 export function startAutoAlarmScheduler() {
   //분, 시, 일, 월, 요일
-  cron.schedule('46 19 * * *', async () => {
+  cron.schedule('05 20 * * *', async () => {
     try {
-      console.log('auto alarm scheduler start');
+      console.log('auto alarm scheduler start1');
+      const userIds = await getAllUserIds();
+      for (const userId of userIds) {
+        await addAutoAlarmService({ userId });
+      }
+    } catch (err) {
+      console.error('오류 발생:', err);
+    }
+  });
+
+  cron.schedule('07 11 * * *', async () => {
+    try {
+      console.log('auto alarm scheduler start2');
       const userIds = await getAllUserIds();
       for (const userId of userIds) {
         await addAutoAlarmService({ userId });
