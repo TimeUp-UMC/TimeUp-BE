@@ -93,12 +93,21 @@ export const getMonthlySchedule = async (userId, year, month) => {
     const expandSpan = (start, end, schedule_id, color) => {
       let s = dayjs(start).tz(TZ);
       let e = dayjs(end).tz(TZ);
-      if (!s.isValid() || !e.isValid() || e.isBefore(s)) return;
+      if (!s.isValid() || !e.isValid()) return;
 
-      s = maxD(s, monthStart);
-      e = minD(e, monthEndExclusive);
+      s = s.isBefore(monthStart) ? monthStart : s;
+      e = e.isAfter(monthEndExclusive) ? monthEndExclusive : e;
 
-      for (let cur = s.startOf('day'); cur.isBefore(e, 'day'); cur = cur.add(1, 'day')) {
+      // ① 길이 0(= e <= s)인 경우: 시작일 하루는 표시
+      if (!e.isAfter(s)) {
+        pushMarker(grouped, s.startOf('day'), schedule_id, color, year, month);
+        return;
+      }
+
+      // ② 길이 > 0인 경우: [s, e) 가 포함하는 '날짜'들을 전부 표시
+      //    종료는 exclusive이므로 e-1ms 의 '날짜'까지 포함
+      const lastDay = e.subtract(1, 'millisecond').startOf('day');
+      for (let cur = s.startOf('day'); !cur.isAfter(lastDay, 'day'); cur = cur.add(1, 'day')) {
         pushMarker(grouped, cur, schedule_id, color, year, month);
       }
     };

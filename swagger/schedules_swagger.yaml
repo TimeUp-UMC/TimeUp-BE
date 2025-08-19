@@ -888,7 +888,7 @@ paths:
                           is_reminding:
                             type: boolean
                             example: true
-                          reminder_minutes:
+                          remind_at:
                             type: integer
                             example: 30
                           is_recurring:
