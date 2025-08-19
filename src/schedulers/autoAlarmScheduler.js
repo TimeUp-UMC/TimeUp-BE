@@ -5,9 +5,11 @@ import { addAutoAlarmService } from '../services/autoalarm.service.js';
 import { getAllUserIds } from '../repositories/user.repository.js';
 
 export function startAutoAlarmScheduler() {
+  console.log("auto");
+  console.log("auto alarm scheduler start");
   // 12:00 (KST)
   cron.schedule(
-    '20 21 * * *',
+    '30 1 * * *',
     async () => {
       try {
         console.log('auto alarm scheduler start1');
@@ -24,7 +26,7 @@ export function startAutoAlarmScheduler() {
     }
   );
 
-  cron.schedule('30 12 * * *', async () => {
+  cron.schedule('33 1 * * *', async () => {
     try {
       console.log('auto alarm scheduler start2');
       const userIds = await getAllUserIds();
