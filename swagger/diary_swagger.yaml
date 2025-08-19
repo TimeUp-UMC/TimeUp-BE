@@ -1,38 +1,12 @@
 paths:
-  /diary/sign-up:
-    post:
+  /diaries/list:
+    get:
       tags:
         - Diary
-      summary: 회원 가입 API
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                name:
-                  type: string
-                gender:
-                  type: string
-                birth:
-                  type: string
-                  format: date
-                address:
-                  type: string
-                detailAddress:
-                  type: string
-                phoneNumber:
-                  type: string
-                preferences:
-                  type: array
-                  items:
-                    type: number
+      summary: 전체 일기 조회
       responses:
         '200':
-          description: 회원 가입 성공 응답
+          description: 전체 일기 조회 성공
           content:
             application/json:
               schema:
@@ -45,19 +19,36 @@ paths:
                     type: object
                     nullable: true
                     example: null
-                  success:
-                    type: object
-                    properties:
-                      email:
-                        type: string
-                      name:
-                        type: string
-                      preferCategory:
-                        type: array
-                        items:
+                  diary:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        diary_id:
+                          type: integer
+                        title:
                           type: string
-        '400':
-          description: 회원 가입 실패 응답
+                        content:
+                          type: string
+                        diary_date:
+                          type: string
+                          format: date
+
+  /diaries/date/{yyyymmdd}:
+    get:
+      tags:
+        - Diary
+      summary: 특정 날짜 일기 조회
+      parameters:
+        - name: yyyymmdd
+          in: path
+          description: 조회할 날짜 (YYYY-MM-DD)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 일기 조회 성공
           content:
             application/json:
               schema:
@@ -65,18 +56,169 @@ paths:
                 properties:
                   resultType:
                     type: string
-                    example: FAIL
-                  error:
-                    type: object
-                    properties:
-                      errorCode:
-                        type: string
-                        example: U001
-                      reason:
-                        type: string
-                      data:
-                        type: object
-                  success:
+                    example: SUCCESS
+                  message:
+                    type: string
+                    example: 일기 조회 완료
+                  diary:
                     type: object
                     nullable: true
-                    example: null
+                    properties:
+                      diary_id:
+                        type: integer
+                      title:
+                        type: string
+                      content:
+                        type: string
+                      diary_date:
+                        type: string
+                        format: date
+        '400':
+          description: 잘못된 날짜 형식
+        '404':
+          description: 해당 날짜에 일기 없음
+
+  /diaries/{diary_id}:
+    get:
+      tags:
+        - Diary
+      summary: 일기 상세 조회
+      parameters:
+        - name: diary_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 상세 일기 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 상세 일기 조회 완료
+                  diary:
+                    type: object
+                    properties:
+                      diary_id:
+                        type: integer
+                      title:
+                        type: string
+                      content:
+                        type: string
+                      diary_date:
+                        type: string
+                        format: date
+        '403':
+          description: 접근 권한 없음
+        '404':
+          description: 일기 없음
+
+  /diaries:
+    post:
+      tags:
+        - Diary
+      summary: 일기 등록
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                diary_date:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: 일기 등록 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 일기 등록 완료
+                  diary_id:
+                    type: integer
+        '400':
+          description: 등록 실패 (유효하지 않은 데이터)
+        '404':
+          description: 사용자 없음
+
+  /diaries/{diary_id}:
+    put:
+      tags:
+        - Diary
+      summary: 일기 수정
+      parameters:
+        - name: diary_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                diary_date:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: 일기 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 일기 수정 완료
+                  diary_id:
+                    type: integer
+        '400':
+          description: 유효하지 않은 데이터
+        '404':
+          description: 일기 또는 사용자 없음
+
+    delete:
+      tags:
+        - Diary
+      summary: 일기 삭제
+      parameters:
+        - name: diary_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 일기 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 일기 삭제 완료
+                  diary_id:
+                    type: integer
+        '404':
+          description: 일기 또는 사용자 없음
