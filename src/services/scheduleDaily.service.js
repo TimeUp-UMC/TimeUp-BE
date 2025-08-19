@@ -14,8 +14,6 @@ const ENABLE_DEBUG = false;
 const minD = (a, b) => (a.isBefore(b) ? a : b);
 const maxD = (a, b) => (a.isAfter(b) ? a : b);
 
-const formatKST = (d) => dayjs(d).tz(TZ).format('YYYY-MM-DDTHH:mm:ss');
-
 // ISO(UTC)로 반환하되, '발생 일자(KST)의 시분초'를 원본 시분초로 맞춤
 const buildOccurrenceUTC = (baseDate, targetDayKST /* dayjs */) => {
   const base = dayjs(baseDate).tz(TZ);
@@ -25,7 +23,7 @@ const buildOccurrenceUTC = (baseDate, targetDayKST /* dayjs */) => {
     .minute(base.minute())
     .second(base.second())
     .millisecond(base.millisecond());
-  return kst.format('YYYY-MM-DDTHH:mm:ss');
+  return kst.utc().toDate();
 };
 
 // weekly/count: 첫 유효 발생(= start 이후 첫 요일 일치)
@@ -85,8 +83,8 @@ export const getDailySchedule = async (userId, date) => {
         out.push({
           scheduleId: row.schedule_id,
           name: row.name,
-          start_date: formatKST(row.start_date),
-          end_date: formatKST(row.end_date),
+          start_date: row.start_date, // 원본 유지
+          end_date: row.end_date,     // 원본 유지
           color: row.color,
         });
       }
@@ -243,8 +241,8 @@ export const getDailySchedule = async (userId, date) => {
           out.push({
             scheduleId: row.schedule_id,
             name: row.name,
-            start_date: formatKST(row.start_date),
-            end_date: formatKST(row.end_date),
+            start_date: row.start_date,
+            end_date: row.end_date,
             color: row.color,
           });
         }
