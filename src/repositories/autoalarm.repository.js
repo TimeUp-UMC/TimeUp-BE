@@ -142,7 +142,7 @@ export async function createAutoAlarmInDB(user_id, dto) {
   return await prisma.auto_alarms.create({
     data: {
       user_id: dto.user_id,
-      schedule_id: dto.schedule_id,
+      schedule_id: typeof dto.schedule_id === 'string' ? 0 : dto.schedule_id,
       wakeup_time: dto.wakeup_time,
       sound_id: dto.sound_id,
       created_at: dto.created_at,
