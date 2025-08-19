@@ -6,7 +6,7 @@ import { getAllUserIds } from '../repositories/user.repository.js';
 
 export function startAutoAlarmScheduler() {
   //분, 시, 일, 월, 요일
-  cron.schedule('05 20 * * *', async () => {
+  cron.schedule('15 20 * * *', async () => {
     try {
       console.log('auto alarm scheduler start1');
       const userIds = await getAllUserIds();
@@ -18,7 +18,7 @@ export function startAutoAlarmScheduler() {
     }
   });
 
-  cron.schedule('07 11 * * *', async () => {
+  cron.schedule('12 11 * * *', async () => {
     try {
       console.log('auto alarm scheduler start2');
       const userIds = await getAllUserIds();
