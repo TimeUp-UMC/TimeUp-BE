@@ -98,7 +98,10 @@ const listNonTimeupCalendars = async (userId) => {
       (c) => (c.summary || '').toLowerCase() !== TIMEUP_SUMMARY.toLowerCase()
     );
   } catch (err) {
-    throw new BusinessLogicError(err?.message);
+    console.warn(
+      `[GoogleCalendar] fetch calendars failed for userId=${userId}: ${err?.message}`
+    );
+    return [];
   }
 };
 
@@ -219,7 +222,7 @@ export const fetchGoogleDailySchedules = async (userId, date) => {
   }
 };
 
-// 자동 알람 계산을 위해 장소 데이터 추가
+// 자동 알람 계산을 위해 장소 여부 필터링
 export const fetchGoogleDailySchedule_alarm = async (userId, date) => {
   try {
     const auth = await createOAuthClientForUser(userId);
@@ -240,15 +243,15 @@ export const fetchGoogleDailySchedule_alarm = async (userId, date) => {
       for (const evt of events) {
         const { start_date, end_date } = normalizeStartEnd(evt);
 
-        // 장소 정보 가져오기
-        const address = evt.location || '(장소 정보 없음)';
+        // 장소 정보가 없으면 건너뜀
+        if (!evt.location || evt.location.trim() === '') continue;
 
         googleSchedules.push({
           schedule_id: evt.id, // DB 스케줄 아님
           name: evt.summary || '(제목 없음)',
           start_date,
           end_date,
-          address, // 장소 정보 추가
+          address: evt.location, // 장소 정보 추가
           color: 'red',
           url: evt.htmlLink,
         });
@@ -257,13 +260,19 @@ export const fetchGoogleDailySchedule_alarm = async (userId, date) => {
 
     return googleSchedules;
   } catch (err) {
-    // ✅ 인증 문제라면 그냥 스킵 (빈 배열 반환)
-    if (err.code === 401 || err.message?.includes('invalid_grant')) {
-      console.warn(`[GoogleCalendar] userId=${userId} 토큰 만료 → 스킵`);
+    // 토큰 만료 / 인증 문제면 스킵
+    if (
+      err.code === 401 ||
+      err.message?.includes('invalid_grant') ||
+      err.message?.includes('Expected OAuth 2 access token')
+    ) {
+      console.warn(
+        `[GoogleCalendar] userId=${userId} 인증 문제 → 스킵: ${err.message}`
+      );
       return [];
     }
 
-    // ✅ 다른 에러는 그대로 로깅만 하고 빈 배열 반환
+    // 그 외 에러는 로그만
     console.error(`[GoogleCalendar] fetch error for userId=${userId}:`, err);
     return [];
   }
