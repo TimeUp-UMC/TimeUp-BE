@@ -6,7 +6,7 @@ import { getAllUserIds } from '../repositories/user.repository.js';
 
 export function startAutoAlarmScheduler() {
   cron.schedule(
-    '00 12 * * *',
+    '* * * * *',
     async () => {
       try {
         console.log('* * *auto alarm scheduler start* * *');
