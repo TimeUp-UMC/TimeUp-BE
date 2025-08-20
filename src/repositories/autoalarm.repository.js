@@ -135,16 +135,25 @@ export const findAutoDataById = async (userObj) => {
 // 자동 알람 등록
 export async function createAutoAlarmInDB(user_id, dto) {
   // 동일한 유저 + 동일한 wakeup_time 있는지 확인
+  // 분 단위로 동일 여부 체크
+  const alarmTime = new Date(dto.wakeup_time);
+  alarmTime.setSeconds(0, 0); // 초, 밀리초 제거
+  const startMinute = new Date(alarmTime.getTime() - 1 * 60 * 1000); // 1분 전
+  const endMinute = new Date(alarmTime.getTime() + 1 * 60 * 1000); // 1분 뒤
+
   const existingAlarm = await prisma.auto_alarms.findFirst({
     where: {
       user_id: dto.user_id,
-      wakeup_time: dto.wakeup_time,
+      wakeup_time: {
+        gte: startMinute,
+        lt: endMinute,
+      },
     },
   });
 
   if (existingAlarm) {
     console.log(
-      `이미 존재하는 auto alarm: user_id=${dto.user_id}, wakeup_time=${dto.wakeup_time}`
+      `이미 존재하는 자동알람 : user_id=${dto.user_id}, wakeup_time=${dto.wakeup_time}`
     );
     return existingAlarm; // 기존 알람 리턴 (새로 추가 안 함)
   }

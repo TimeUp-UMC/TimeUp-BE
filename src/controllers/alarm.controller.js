@@ -6,6 +6,7 @@ import { getWakeUpAlarmByUserId } from '../services/wakeupalarm.service.js';
 import { getMyAlarmByUserId } from '../services/myalarm.service.js';
 import { getAutoAlarmByUserId } from '../services/autoalarm.service.js';
 import { savePushTokenService } from '../services/alarm.service.js';
+import { addAutoAlarmService } from '../services/autoalarm.service.js';
 import { prisma } from '../db.config.js';
 
 // 알람 조회 API
@@ -24,7 +25,7 @@ export const getAllAlarm = async (req, res, next) => {
     }
 
     // 자동 알람 생성
-    addAutoAlarmService({ userId });
+    await addAutoAlarmService({ userId });
 
     // 기상 알람 조회
     // 서비스 호출
