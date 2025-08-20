@@ -253,7 +253,7 @@ export const addAutoAlarmService = async (userId) => {
   } = autoData;
 
   if (!schedule || schedule.length === 0) {
-    console.info(`userId ${userId}는 내일 스케줄이 없습니다.`);
+    console.info(`userId ${userId.userId} 는 내일 스케줄이 없습니다.`);
     return; // 자동 알람 생성하지 않음
   }
   const scheduleStartDate = new Date(schedule.start_date);

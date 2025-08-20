@@ -5,13 +5,13 @@ import { addAutoAlarmService } from '../services/autoalarm.service.js';
 import { getAllUserIds } from '../repositories/user.repository.js';
 
 export function startAutoAlarmScheduler() {
-  // 12:00 (KST)
   cron.schedule(
-    '20 21 * * *',
+    '* * * * *',
     async () => {
       try {
-        console.log('auto alarm scheduler start1');
+        console.log('* * *auto alarm scheduler start* * *');
         const userIds = await getAllUserIds();
+        console.log(`Found ${userIds.length} users`);
         for (const userId of userIds) {
           await addAutoAlarmService({ userId });
         }
@@ -23,16 +23,4 @@ export function startAutoAlarmScheduler() {
       timezone: 'Asia/Seoul',
     }
   );
-
-  cron.schedule('30 12 * * *', async () => {
-    try {
-      console.log('auto alarm scheduler start2');
-      const userIds = await getAllUserIds();
-      for (const userId of userIds) {
-        await addAutoAlarmService({ userId });
-      }
-    } catch (err) {
-      console.error('오류 발생:', err);
-    }
-  });
 }
