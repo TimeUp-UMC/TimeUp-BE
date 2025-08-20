@@ -17,6 +17,8 @@ export const findAutoDataById = async (userObj) => {
   const dbtomorrowEnd = new Date(
     tomorrowStartKST.getTime() + 24 * 60 * 60 * 1000 - 1
   );
+  console.log('dbtomorrowStart', dbtomorrowStart);
+  console.log('dbtomorrowEnd', dbtomorrowEnd);
 
   // 유저 기본 정보
 
@@ -54,6 +56,7 @@ export const findAutoDataById = async (userObj) => {
       address: true,
     },
   });
+  console.log(dbSchedule);
   // 구글 캘린더 스케줄
   const yyyyMmDd = dbtomorrowStart.toISOString().split('T')[0]; // YYYY-MM-DD
   const googleSchedules = await fetchGoogleDailySchedule_alarm(
@@ -61,19 +64,13 @@ export const findAutoDataById = async (userObj) => {
     yyyyMmDd
   );
 
-  // 내일 범위에 속하는 구글 일정만 필터
-  const tomorrowSchedules = googleSchedules.filter((s) => {
-    const startDate = new Date(s.start_date);
-    return startDate >= dbtomorrowStart && startDate <= dbtomorrowEnd;
-  });
-
   // 가장 빠른 일정 하나만 선택
   let googleSchedule = null;
-  if (tomorrowSchedules.length > 0) {
-    tomorrowSchedules.sort(
+  if (googleSchedules.length > 0) {
+    googleSchedules.sort(
       (a, b) => new Date(a.start_date) - new Date(b.start_date)
     );
-    googleSchedule = tomorrowSchedules[0];
+    googleSchedule = googleSchedules[0];
   }
 
   // DB vs Google 중 더 빠른 일정 선택
@@ -139,6 +136,8 @@ export const findAutoDataById = async (userObj) => {
 
 // 자동 알람 등록
 export async function createAutoAlarmInDB(user_id, dto) {
+  console.log('auto alarm create : ');
+  console.log(dto);
   return await prisma.auto_alarms.create({
     data: {
       user_id: dto.user_id,
