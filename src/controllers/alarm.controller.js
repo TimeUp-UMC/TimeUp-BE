@@ -6,6 +6,7 @@ import { getWakeUpAlarmByUserId } from '../services/wakeupalarm.service.js';
 import { getMyAlarmByUserId } from '../services/myalarm.service.js';
 import { getAutoAlarmByUserId } from '../services/autoalarm.service.js';
 import { savePushTokenService } from '../services/alarm.service.js';
+import { addAutoAlarmService } from '../services/autoalarm.service.js';
 import { prisma } from '../db.config.js';
 
 // 알람 조회 API
