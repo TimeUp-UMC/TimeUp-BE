@@ -25,7 +25,7 @@ export const getAllAlarm = async (req, res, next) => {
     }
 
     // 자동 알람 생성
-    addAutoAlarmService({ userId });
+    await addAutoAlarmService({ userId });
 
     // 기상 알람 조회
     // 서비스 호출
