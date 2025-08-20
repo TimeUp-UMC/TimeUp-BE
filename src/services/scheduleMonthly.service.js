@@ -32,9 +32,6 @@ const pushMarker = (grouped, d, schedule_id, color, year, month) => {
   if (!isSameYearMonthKST(k, year, month)) return;
   const dayKey = String(k.date());
   (grouped[dayKey] ||= []).push({ scheduleId: schedule_id, color });
-  if (ENABLE_DEBUG) {
-    console.log('[DEBUG][PUSH]', { schedule_id, color, dayKey, dateKST: k.format('YYYY-MM-DD') });
-  }
 };
 
 // weekly/count: 첫 유효 발생(= start 이후 첫 요일 일치)
@@ -64,28 +61,13 @@ const calcWeeklyLastOccurrenceByCount = (firstValid, weekdays, countLimit, hardE
 
 export const getMonthlySchedule = async (userId, year, month) => {
   try {
-    if (ENABLE_DEBUG) {
-      console.log('\n[DEBUG] === getMonthlySchedule START ===');
-      console.log('[DEBUG] Params:', { userId, year, month });
-    }
-
     // DB 로드
     const rows = await findSchedulesByMonth(userId, year, month);
-    if (ENABLE_DEBUG) {
-      console.log('[DEBUG] Raw DB rows:', JSON.stringify(rows, null, 2));
-    }
 
     // KST 월 범위
     const { start: monthStartDate, end: monthEndDate } = getKSTMonthRange(year, month);
     const monthStart = dayjs(monthStartDate).tz(TZ).startOf('day');
     const monthEndExclusive = dayjs(monthEndDate).tz(TZ).add(1, 'millisecond'); // [start, end)
-
-    if (ENABLE_DEBUG) {
-      console.log('[DEBUG] Month KST Range:', {
-        monthStart: monthStart.format(),
-        monthEndExclusive: monthEndExclusive.format(),
-      });
-    }
 
     const grouped = {}; // { "1": [{ schedule_id, color }], ... }
 
@@ -115,8 +97,6 @@ export const getMonthlySchedule = async (userId, year, month) => {
     // weekly 전개
     const expandWeekly = (row) => {
       const { schedule_id, color, start_date, recurrence_rule: rr } = row;
-      if (ENABLE_DEBUG) console.log(`[DEBUG] expandWeekly for schedule_id=${schedule_id}`, rr);
-
       const start = dayjs(start_date).tz(TZ).startOf('day');
       const until = (rr.repeat_mode === 'until' && rr.repeat_until_date)
         ? dayjs(rr.repeat_until_date).tz(TZ).startOf('day')
@@ -148,8 +128,6 @@ export const getMonthlySchedule = async (userId, year, month) => {
     // monthly 전개
     const expandMonthly = (row) => {
       const { schedule_id, color, start_date, recurrence_rule: rr } = row;
-      if (ENABLE_DEBUG) console.log(`[DEBUG] expandMonthly for schedule_id=${schedule_id}`, rr);
-
       const start = dayjs(start_date).tz(TZ).startOf('day');
       const until = (rr.repeat_mode === 'until' && rr.repeat_until_date)
         ? dayjs(rr.repeat_until_date).tz(TZ).startOf('day')
@@ -251,15 +229,8 @@ export const getMonthlySchedule = async (userId, year, month) => {
 
     // 전개
     for (const row of rows) {
-      if (!rowTouchesMonth(row)) {
-        if (ENABLE_DEBUG) {
-          console.log('[DEBUG][SKIP_ROW]', {
-            schedule_id: row.schedule_id,
-            reason: 'no_intersection_with_month_or_until_passed',
-          });
-        }
+      if (!rowTouchesMonth(row))
         continue;
-      }
 
       const { schedule_id, color, start_date, end_date, is_recurring, recurrence_rule } = row;
 
@@ -276,11 +247,6 @@ export const getMonthlySchedule = async (userId, year, month) => {
         // 미지정 타입: 시작일만
         pushMarker(grouped, start_date, schedule_id, color, year, month);
       }
-    }
-
-    if (ENABLE_DEBUG) {
-      console.log('[DEBUG] Final grouped result:', JSON.stringify(grouped, null, 2));
-      console.log('[DEBUG] === getMonthlySchedule END ===\n');
     }
 
     return grouped;
