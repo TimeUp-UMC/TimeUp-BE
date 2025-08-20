@@ -28,6 +28,9 @@ export const findDiaryById = async (DiaryId) => {
 export const getDiaryInDB = async (userId) => {
   const Diary = await prisma.diary.findMany({
     where: { user_id: userId },
+    orderBy: {
+      diary_date: 'desc',
+    },
   });
   return Diary;
 };

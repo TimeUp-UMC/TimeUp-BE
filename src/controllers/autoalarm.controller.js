@@ -5,10 +5,7 @@ import {
   getMPAutoAlarmDTO,
 } from '../dtos/autoalarm.dto.js';
 import { addAutoAlarmService } from '../services/autoalarm.service.js';
-import {
-  findAutoDataById,
-  findAutoAlarmById,
-} from '../repositories/autoalarm.repository.js';
+import { findAutoAlarmById } from '../repositories/autoalarm.repository.js';
 import { updatedAutoAlarmService } from '../services/autoalarm.service.js';
 import { StatusCodes } from 'http-status-codes';
 import { prisma } from '../db.config.js';
