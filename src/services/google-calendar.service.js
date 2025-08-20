@@ -98,7 +98,10 @@ const listNonTimeupCalendars = async (userId) => {
       (c) => (c.summary || '').toLowerCase() !== TIMEUP_SUMMARY.toLowerCase()
     );
   } catch (err) {
-    throw new BusinessLogicError(err?.message);
+    console.warn(
+      `[GoogleCalendar] fetch calendars failed for userId=${userId}: ${err?.message}`
+    );
+    return [];
   }
 };
 
