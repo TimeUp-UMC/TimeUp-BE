@@ -23,6 +23,9 @@ export const getAllAlarm = async (req, res, next) => {
       throw new NotFoundError('사용자가 없습니다.');
     }
 
+    // 자동 알람 생성
+    addAutoAlarmService({ userId });
+
     // 기상 알람 조회
     // 서비스 호출
     const WakeUpAlarm = await getWakeUpAlarmByUserId(userId); // 기상 알람

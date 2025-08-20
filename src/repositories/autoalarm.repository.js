@@ -17,8 +17,6 @@ export const findAutoDataById = async (userObj) => {
   const dbtomorrowEnd = new Date(
     tomorrowStartKST.getTime() + 24 * 60 * 60 * 1000 - 1
   );
-  console.log('dbtomorrowStart', dbtomorrowStart);
-  console.log('dbtomorrowEnd', dbtomorrowEnd);
 
   // 유저 기본 정보
 
@@ -56,7 +54,7 @@ export const findAutoDataById = async (userObj) => {
       address: true,
     },
   });
-  console.log(dbSchedule);
+
   // 구글 캘린더 스케줄
   const yyyyMmDd = dbtomorrowStart.toISOString().split('T')[0]; // YYYY-MM-DD
   const googleSchedules = await fetchGoogleDailySchedule_alarm(
@@ -136,6 +134,21 @@ export const findAutoDataById = async (userObj) => {
 
 // 자동 알람 등록
 export async function createAutoAlarmInDB(user_id, dto) {
+  // 동일한 유저 + 동일한 wakeup_time 있는지 확인
+  const existingAlarm = await prisma.auto_alarms.findFirst({
+    where: {
+      user_id: dto.user_id,
+      wakeup_time: dto.wakeup_time,
+    },
+  });
+
+  if (existingAlarm) {
+    console.log(
+      `이미 존재하는 auto alarm: user_id=${dto.user_id}, wakeup_time=${dto.wakeup_time}`
+    );
+    return existingAlarm; // 기존 알람 리턴 (새로 추가 안 함)
+  }
+
   console.log('auto alarm create : ');
   console.log(dto);
   return await prisma.auto_alarms.create({

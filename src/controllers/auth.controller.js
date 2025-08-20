@@ -1,4 +1,5 @@
 import * as authService from '../services/auth.services.js';
+import { autoAlarmJob } from '../schedulers/autoAlarmScheduler.js';
 import {
   InternalServerError,
   UnauthorizedError,
@@ -19,6 +20,8 @@ export const loginWithGoogle = async (req, res) => {
       googleRefreshToken: refresh_token,
     });
     res.success(result);
+
+    autoAlarmJob();
   } catch (err) {
     console.log('Login failed', err.message);
     throw new ValidationError();
