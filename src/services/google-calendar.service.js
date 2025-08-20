@@ -257,6 +257,14 @@ export const fetchGoogleDailySchedule_alarm = async (userId, date) => {
 
     return googleSchedules;
   } catch (err) {
-    throw new BusinessLogicError(err?.message);
+    // ✅ 인증 문제라면 그냥 스킵 (빈 배열 반환)
+    if (err.code === 401 || err.message?.includes('invalid_grant')) {
+      console.warn(`[GoogleCalendar] userId=${userId} 토큰 만료 → 스킵`);
+      return [];
+    }
+
+    // ✅ 다른 에러는 그대로 로깅만 하고 빈 배열 반환
+    console.error(`[GoogleCalendar] fetch error for userId=${userId}:`, err);
+    return [];
   }
 };
