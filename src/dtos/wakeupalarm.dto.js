@@ -64,10 +64,10 @@ export const pushWakeUpAlarmDTO = (wakeup_alarms, token) => {
   const rawData = {
     wakeup_alarm_id: wakeup_alarms.wakeup_alarm_id,
     wakeup_time: wakeup_alarms.wakeup_time ? new Date(wakeup_alarms.wakeup_time).toISOString(): '',
-    memo: typeof my_alarms.memo === 'string'
-    ? my_alarms.memo
-    : my_alarms.memo != null
-      ? JSON.stringify(my_alarms.memo)
+    memo: typeof wakeup_alarms.memo === 'string'
+    ? wakeup_alarms.memo
+    : wakeup_alarms.memo != null
+      ? JSON.stringify(wakeup_alarms.memo)
       : ''
   };
 

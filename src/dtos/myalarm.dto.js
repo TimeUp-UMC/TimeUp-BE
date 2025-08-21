@@ -75,22 +75,12 @@ export const getMyalarmDTO = (MyAlarm) => {
 // 내 알람 푸시 알람 DTO
 export const pushMyAlarmDTO = (my_alarms, token) => {
   const rawData = {
-    alarm_id: my_alarms.alarm_id,
-    my_alarm_time: my_alarms.my_alarm_time ? new Date(my_alarms.my_alarm_time).toISOString(): '',
-    memo: typeof my_alarms.memo === 'string'
-      ? my_alarms.memo
-      : my_alarms.memo != null
-        ? JSON.stringify(my_alarms.memo)
-        : ''
+    alarm_id: String(my_alarms.alarm_id ?? ''),
+    my_alarm_time: my_alarms.my_alarm_time
+      ? new Date(my_alarms.my_alarm_time).toISOString()
+      : '',
+    memo: my_alarms.memo != null ? String(my_alarms.memo) : ''
   };
-
-  // string 으로 변환
-  const data = Object.fromEntries(
-    Object.entries(rawData).map(([key, value]) => [
-      key,
-      typeof value === 'string' ? value : String(value ?? '')
-    ])
-  );
 
   return {
     token, 
@@ -99,17 +89,11 @@ export const pushMyAlarmDTO = (my_alarms, token) => {
       body: '확인',
     },
     android: {
-      notification: {
-        sound: 'default',
-      },
+      notification: { sound: 'default' },
     },
     apns: {
-      payload: {
-        aps: {
-          sound: 'default',
-        },
-      },
+      payload: { aps: { sound: 'default' } },
     },
-    data
+    data: rawData,
   };
 };
