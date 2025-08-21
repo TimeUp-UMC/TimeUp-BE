@@ -146,7 +146,7 @@ export const getMonthlySchedule = async (userId, year, month) => {
         const d = getDayOfMonth(year, month, rr.day_of_month);
         candidate = d ? dayjs(d).tz(TZ).startOf('day') : null;
       } else if (
-        rr.monthly_repeat_option === 'by_nth_weekday' &&
+        isByNthWeekday &&
         rr.nth_week && (rr.weekday !== null && rr.weekday !== undefined)
       ) {
         const d = getNthWeekdayOfMonth(year, month, rr.nth_week, rr.weekday);
