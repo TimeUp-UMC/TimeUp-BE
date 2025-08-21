@@ -47,28 +47,55 @@ export const getWakeUpAlarmDTO = (WakeUpAlarm) => {
     wakeup_alarm_id: WakeUpAlarm.wakeup_alarm_id,
     wakeup_time: WakeUpAlarm.wakeup_time,
     is_active: WakeUpAlarm.is_active,
+    is_repeating: WakeUpAlarm.is_repeating, 
+    is_sound: WakeUpAlarm.is_sound, 
+    is_vibrating: WakeUpAlarm.is_vibrating,
+    vibration_type: WakeUpAlarm.vibration_type, 
+    sound_id: WakeUpAlarm.sound_id, 
+    repeat_interval: WakeUpAlarm.repeat_count, 
+    repeat_count: WakeUpAlarm.repeat_count, 
+    memo: WakeUpAlarm.memo,
     day: WakeUpAlarm.day
   }
 };
 
 // 기상 알람 푸시 알람 DTO
 export const pushWakeUpAlarmDTO = (wakeup_alarms, token) => {
+  const rawData = {
+    wakeup_alarm_id: wakeup_alarms.wakeup_alarm_id,
+    wakeup_time: wakeup_alarms.wakeup_time ? new Date(wakeup_alarms.wakeup_time).toISOString(): '',
+    memo: typeof my_alarms.memo === 'string'
+    ? my_alarms.memo
+    : my_alarms.memo != null
+      ? JSON.stringify(my_alarms.memo)
+      : ''
+  };
+
+  // string 으로 변환
+  const data = Object.fromEntries(
+    Object.entries(rawData).map(([key, value]) => [
+      key,
+      typeof value === 'string' ? value : String(value ?? '')
+    ])
+  );
   return {
-    to: token,
-    sound: 'default',
-    title: '기상 알람',
-    body: '알람 해제',
-    data: {
-      wakeup_alarm_id: wakeup_alarms.wakeup_alarm_id,
-      wakeup_time: wakeup_alarms.wakeup_time,
-      is_active: wakeup_alarms.is_active,
-      is_sound: wakeup_alarms.is_sound,
-      is_vibrating: wakeup_alarms.is_vibrating,
-      is_repeating: wakeup_alarms.is_repeating,
-      sound_id: wakeup_alarms.sound_id,
-      vibration_type: wakeup_alarms.vibration_type,
-      repeat_interval: wakeup_alarms.repeat_interval,
-      repeat_count: wakeup_alarms.repeat_count,
-    }
-  }
+    token, 
+    notification: {
+      title: '기상 알람',
+      body: '알람 해제',
+    },
+    android: {
+      notification: {
+        sound: 'default',
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: 'default',
+        },
+      },
+    },
+    data
+  };
 };
