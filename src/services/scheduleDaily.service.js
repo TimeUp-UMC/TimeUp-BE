@@ -161,13 +161,17 @@ export const getDailySchedule = async (userId, date) => {
       if (dayStart.isBefore(start, 'day')) return;
       if (until && !dayStart.isBefore(until, 'day')) return;
 
+      const opt = rr.monthly_repeat_option;
+      const isByDayOfMonth = opt === 'by_day_of_month' || opt === 'day_of_month';
+      const isByNthWeekday = opt === 'by_nth_weekday' || opt === 'nth_weekday';
+
       // 이번 달 후보
       let candidate = null;
       if (rr.monthly_repeat_option === 'by_day_of_month' && rr.day_of_month) {
         const d = getDayOfMonth(year, month, rr.day_of_month);
         candidate = d ? dayjs(d).tz(TZ).startOf('day') : null;
       } else if (
-        rr.monthly_repeat_option === 'by_nth_weekday' &&
+        isByNthWeekday &&
         rr.nth_week &&
         (rr.weekday !== null && rr.weekday !== undefined)
       ) {
@@ -186,9 +190,7 @@ export const getDailySchedule = async (userId, date) => {
             let dd = null;
             if (rr.monthly_repeat_option === 'by_day_of_month' && rr.day_of_month) {
               dd = getDayOfMonth(y, m, rr.day_of_month);
-            } else if (
-              rr.nth_week &&
-              (rr.weekday !== null && rr.weekday !== undefined)
+            } else if (isByNthWeekday && rr.nth_week && (rr.weekday !== null && rr.weekday !== undefined)
             ) {
               dd = getNthWeekdayOfMonth(y, m, rr.nth_week, rr.weekday);
             }
