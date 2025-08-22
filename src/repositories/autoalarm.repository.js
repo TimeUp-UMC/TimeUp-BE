@@ -189,40 +189,39 @@ export const findAutoAlarmById = async (ATalarmId) => {
 
 // 자동 알람 조회
 export const getAutoAlarmInDB = async (user_id) => {
-  // 지금 시간 (UTC)
+  // 현재 시각 (UTC)
   const now = new Date();
 
-  // 오늘 0시 ~ 24시 (KST)
-  const todayKST = new Date(now.getTime() + 60 * 1000);
+  // 한국 시간(KST) 기준 오늘 0시
+  const todayKST = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   todayKST.setHours(0, 0, 0, 0);
 
-  // 내일 0시 ~ 24시 (KST)
-  const tomorrowKST = new Date(now.getTime() + 60 * 1000);
-  tomorrowKST.setHours(0, 0, 0, 0);
+  // 내일 0시 (KST)
+  const tomorrowKST = new Date(todayKST.getTime() + 24 * 60 * 60 * 1000);
 
-  // UTC 변환
-  const todayStartUTC = new Date(todayKST.getTime() - 9 * 60 * 60000);
+  // 다시 UTC로 변환
+  const todayStartUTC = new Date(todayKST.getTime() - 9 * 60 * 60 * 1000);
   const todayEndUTC = new Date(todayStartUTC.getTime() + 24 * 60 * 60 * 1000);
-  const tomorrowStartUTC = new Date(tomorrowKST.getTime() - 9 * 60 * 60000);
+  const tomorrowStartUTC = new Date(tomorrowKST.getTime() - 9 * 60 * 60 * 1000);
   const tomorrowEndUTC = new Date(tomorrowStartUTC.getTime() + 24 * 60 * 60 * 1000);
-  
 
   console.log('오늘 시작 : ', todayStartUTC);
   console.log('오늘 끝 : ', todayEndUTC);
   console.log('내일 시작 : ', tomorrowStartUTC);
   console.log('내일 끝 : ', tomorrowEndUTC);
 
-  if (now.getHours() < 3) {
-    // 정오 이전 → 오늘 00:00 ~ 11:59:59
-    const Tstart = todayStartUTC;
-    const Tend = todayEndUTC;
+  // 조건
+  let Tstart, Tend;
+  if (now.getHours() < 3) { 
+    // 오늘 (0시 ~ 24시 전)
+    Tstart = todayStartUTC;
+    Tend = todayEndUTC;
   } else {
-    // 정오 이후 → 내일 00:00 ~ 23:59:59
-    const Tstart = tomorrowStartUTC;
-    const Tend = tomorrowEndUTC;
+    // 내일 (0시 ~ 24시 전)
+    Tstart = tomorrowStartUTC;
+    Tend = tomorrowEndUTC;
   }
 
-  // UTC로 변환 (DB 저장 기준)
   return prisma.auto_alarms.findMany({
     where: {
       user_id: user_id,
