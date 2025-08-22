@@ -1,3 +1,22 @@
+
+import { raw } from "mysql2";
+
+// 자동 알람 등록
+export const createAutoAlarmDTO = (user_id, body) => {
+    const {
+      schedule_id,
+      wakeup_time,
+      is_active,
+      is_repeating,
+      repeat_interval,
+      repeat_count,
+      created_at,
+      is_sound,
+      is_vibrating,
+      sound_id,
+      vibration_type,
+    } = body;
+
 // 자동 알람 수정
 export const updateAutoAlarmDTO = (ATalarmId, body) => {
   const {
@@ -75,4 +94,35 @@ export const pushAutoAlarmDTO = (auto_alarms, token) => {
       repeat_count: auto_alarms.repeat_count,
     },
   };
-};
+  
+  // 자동 알람 푸시 알람 DTO
+  export const pushAutoAlarmDTO = (auto_alarms, token) => {
+    const rawData = {
+      auto_alarm_id: String(auto_alarms.auto_alarm_id ?? ''),
+      wakeup_time: auto_alarms.wakeup_time
+        ? new Date(auto_alarms.wakeup_time).toISOString()
+        : '',
+    };
+
+    return {
+      token, 
+      notification: {
+        title: '기상 알람',
+        body: '알람 해제',
+      },
+      android: {
+        notification: {
+          sound: 'default',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default',
+          },
+        },
+      },
+      data: rawData
+    };
+  };
+

@@ -18,6 +18,7 @@ import {
 } from './errors/error.js';
 import { setupSwagger } from '../swagger/swagger.config.js';
 import { verifyAccessToken } from './middlewares/authMiddleware.js';
+import { startAutoAlarmJob, startMyAlarmJob, startScheduleAlarmjob, startWakeUpAlarmJob, startActiveAutoAlarmJob } from './cron/pushalarm.job.js';
 
 dotenv.config();
 
@@ -72,6 +73,13 @@ app.use('/diaries', diaryRoutes);
 
 // 자동 알람 생성 Scheduler
 startAutoAlarmScheduler();
+
+// 푸시 알람 전송 job
+startWakeUpAlarmJob();
+startAutoAlarmJob();
+startMyAlarmJob();
+startScheduleAlarmjob();
+startActiveAutoAlarmJob();
 
 // 404 처리
 app.use((req, res, next) => {
