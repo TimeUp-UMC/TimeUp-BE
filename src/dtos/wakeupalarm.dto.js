@@ -47,14 +47,6 @@ export const getWakeUpAlarmDTO = (WakeUpAlarm) => {
     wakeup_alarm_id: WakeUpAlarm.wakeup_alarm_id,
     wakeup_time: WakeUpAlarm.wakeup_time,
     is_active: WakeUpAlarm.is_active,
-    is_repeating: WakeUpAlarm.is_repeating, 
-    is_sound: WakeUpAlarm.is_sound, 
-    is_vibrating: WakeUpAlarm.is_vibrating,
-    vibration_type: WakeUpAlarm.vibration_type, 
-    sound_id: WakeUpAlarm.sound_id, 
-    repeat_interval: WakeUpAlarm.repeat_count, 
-    repeat_count: WakeUpAlarm.repeat_count, 
-    memo: WakeUpAlarm.memo,
     day: WakeUpAlarm.day
   }
 };

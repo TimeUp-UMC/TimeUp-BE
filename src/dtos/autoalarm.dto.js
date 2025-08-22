@@ -39,7 +39,7 @@ export const getAutoAlarmDTO = (AutoAlarm) => {
     user_id: AutoAlarm.user_id,
     auto_alarm_id: AutoAlarm.auto_alarm_id,
     wakeup_time: date,
-    is_active: AutoAlarm.is_active,
+    is_active: AutoAlarm.is_active
   };
 };
 
