@@ -60,15 +60,7 @@ export const getMyalarmDTO = (MyAlarm) => {
     my_alarm_id: MyAlarm.alarm_id,
     my_alarm_name: MyAlarm.my_alarm_name,
     my_alarm_time: date,
-    is_active: MyAlarm.is_active,
-    is_repeating: MyAlarm.is_repeating, 
-    is_sound: MyAlarm.is_sound, 
-    is_vibrating: MyAlarm.is_vibrating, 
-    vibration_type: MyAlarm.vibration_type, 
-    sound_id: MyAlarm.sound_id, 
-    repeat_interval: MyAlarm.repeat_interval, 
-    repeat_count: MyAlarm.repeat_count, 
-    memo: MyAlarm.memo
+    is_active: MyAlarm.is_active
   };
 };
 
