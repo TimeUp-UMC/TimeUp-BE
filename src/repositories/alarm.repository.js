@@ -46,12 +46,12 @@ export const findAutoAlarmsDueNow = async () => {
       },
     },
 
-    // select: {
-    //   auto_alarm_id: true,
-    //   schedule_id: true,
-    //   wakeup_time: true,
-    //   user_id: true
-    // }
+    select: {
+       auto_alarm_id: true,
+      schedule_id: true,
+      wakeup_time: true,
+      user_id: true
+    }
   });
 };
 
