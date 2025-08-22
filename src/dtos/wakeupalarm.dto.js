@@ -53,22 +53,41 @@ export const getWakeUpAlarmDTO = (WakeUpAlarm) => {
 
 // 기상 알람 푸시 알람 DTO
 export const pushWakeUpAlarmDTO = (wakeup_alarms, token) => {
+  const rawData = {
+    wakeup_alarm_id: wakeup_alarms.wakeup_alarm_id,
+    wakeup_time: wakeup_alarms.wakeup_time ? new Date(wakeup_alarms.wakeup_time).toISOString(): '',
+    memo: typeof wakeup_alarms.memo === 'string'
+    ? wakeup_alarms.memo
+    : wakeup_alarms.memo != null
+      ? JSON.stringify(wakeup_alarms.memo)
+      : ''
+  };
+
+  // string 으로 변환
+  const data = Object.fromEntries(
+    Object.entries(rawData).map(([key, value]) => [
+      key,
+      typeof value === 'string' ? value : String(value ?? '')
+    ])
+  );
   return {
-    to: token,
-    sound: 'default',
-    title: '기상 알람',
-    body: '알람 해제',
-    data: {
-      wakeup_alarm_id: wakeup_alarms.wakeup_alarm_id,
-      wakeup_time: wakeup_alarms.wakeup_time,
-      is_active: wakeup_alarms.is_active,
-      is_sound: wakeup_alarms.is_sound,
-      is_vibrating: wakeup_alarms.is_vibrating,
-      is_repeating: wakeup_alarms.is_repeating,
-      sound_id: wakeup_alarms.sound_id,
-      vibration_type: wakeup_alarms.vibration_type,
-      repeat_interval: wakeup_alarms.repeat_interval,
-      repeat_count: wakeup_alarms.repeat_count,
-    }
-  }
+    token, 
+    notification: {
+      title: '기상 알람',
+      body: '알람 해제',
+    },
+    android: {
+      notification: {
+        sound: 'default',
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: 'default',
+        },
+      },
+    },
+    data
+  };
 };

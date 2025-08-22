@@ -66,22 +66,26 @@ export const getMyalarmDTO = (MyAlarm) => {
 
 // 내 알람 푸시 알람 DTO
 export const pushMyAlarmDTO = (my_alarms, token) => {
+  const rawData = {
+    alarm_id: String(my_alarms.alarm_id ?? ''),
+    my_alarm_time: my_alarms.my_alarm_time
+      ? new Date(my_alarms.my_alarm_time).toISOString()
+      : '',
+    memo: my_alarms.memo != null ? String(my_alarms.memo) : ''
+  };
+
   return {
-    to: token,
-    sound: 'default',
-    title: my_alarms.my_alarm_name,
-    body: '알람 해제',
-    data: {
-      my_alarm_id: my_alarms.my_alarm_id,
-      my_alarm_time: my_alarms.my_alarm_time,
-      is_active: my_alarms.is_active,
-      is_repeating: my_alarms.is_repeating,
-      is_sound: my_alarms.is_sound,
-      is_vibrating: my_alarms.is_vibrating,
-      vibration_type: my_alarms.vibration_type,
-      sound_id: my_alarms.sound_id,
-      repeat_interval: my_alarms.repeat_interval,
-      repeat_count: my_alarms.repeat_count,
-    }
-  }
+    token, 
+    notification: {
+      title: my_alarms.my_alarm_name,
+      body: '확인',
+    },
+    android: {
+      notification: { sound: 'default' },
+    },
+    apns: {
+      payload: { aps: { sound: 'default' } },
+    },
+    data: rawData,
+  };
 };

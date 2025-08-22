@@ -1,3 +1,4 @@
+
 // 자동 알람 수정
 export const updateAutoAlarmDTO = (ATalarmId, body) => {
   const {
@@ -38,7 +39,7 @@ export const getAutoAlarmDTO = (AutoAlarm) => {
     user_id: AutoAlarm.user_id,
     auto_alarm_id: AutoAlarm.auto_alarm_id,
     wakeup_time: date,
-    is_active: AutoAlarm.is_active,
+    is_active: AutoAlarm.is_active
   };
 };
 
@@ -54,25 +55,35 @@ export const getMPAutoAlarmDTO = (AutoAlarm, ATalarmId) => {
   };
 };
 
-// 자동 알람 푸시 알람 DTO
-export const pushAutoAlarmDTO = (auto_alarms, token) => {
+  // 자동 알람 푸시 알람 DTO
+  export const pushAutoAlarmDTO = (auto_alarms, token) => {
+    const rawData = {
+      auto_alarm_id: String(auto_alarms.auto_alarm_id ?? ''),
+      wakeup_time: auto_alarms.wakeup_time
+        ? new Date(auto_alarms.wakeup_time).toISOString()
+        : '',
+    };
+
+
+
   return {
-    to: token,
-    sound: 'default',
-    title: '기상 알람',
-    body: '알람 해제',
-    data: {
-      auto_alarm_id: auto_alarms.auto_alarm_id,
-      wakeup_time: auto_alarms.wakeup_time,
-      is_active: auto_alarms.is_active,
-      shcedule_id: auto_alarms.schedule_id,
-      is_repeating: auto_alarms.is_repeating,
-      is_sound: auto_alarms.is_sound,
-      is_vibrating: auto_alarms.is_vibrating,
-      vibration_type: auto_alarms.vibration_type,
-      sound_id: auto_alarms.sound_id,
-      repeat_interval: auto_alarms.repeat_interval,
-      repeat_count: auto_alarms.repeat_count,
+    token,
+    notification: {
+      title: '기상 알람',
+      body: '알람 해제',
     },
+    android: {
+      notification: {
+        sound: 'default',
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: 'default',
+        },
+      },
+    },
+    data: rawData,
   };
 };

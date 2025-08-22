@@ -114,3 +114,48 @@ export const bodyToSchedule = (body) => {
     memo: memo ?? null,
   };
 };
+
+// 일정 알람 푸시 알람 DTO
+export const pushScheduleAlarmDTO = (schedule, token, remindAt) => {
+  const rawData = {
+    schedule_id: String(schedule.schedule_id),
+    start_date: schedule.start_date
+      ? new Date(schedule.start_date).toISOString()
+      : '',
+    end_date: schedule.end_date
+      ? new Date(schedule.end_date).toISOString()
+      : '',
+    place_name: schedule.place_name,
+    address: schedule.address,
+    remind_at: remindAt ? String(remindAt) : ''
+  };
+
+  // 메세지 정의
+  const RemindMessage = (remindAt) => {
+    if (remindAt === 0) return '일정이 지금 시작됩니다.';
+    if (remindAt === 60) return '1시간 뒤에 일정이 시작됩니다.';
+    if (remindAt === 1440) return '1일 뒤에 일정이 시작됩니다.';
+    return `${remindAt}분 뒤에 일정이 시작됩니다.`;
+  };
+
+  return {
+    token,
+    notification: {
+      title: schedule.name,
+      body: RemindMessage(remindAt)
+    },
+    android: {
+      notification: {
+        sound: 'default',
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: 'default',
+        },
+      },
+    },
+    data: rawData
+  };
+};
