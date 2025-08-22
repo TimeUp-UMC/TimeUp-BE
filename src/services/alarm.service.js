@@ -75,7 +75,7 @@ export const sendDueMyAlarms = async () => {
             });
             console.log('내 알람 삭제 완료', alarm.alarm_id);
         } catch (error) {
-            next(error);
+            throw error;
         }
       })
     );
