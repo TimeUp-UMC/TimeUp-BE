@@ -49,16 +49,9 @@ export const findAutoAlarmsDueNow = async () => {
     select: {
       auto_alarm_id: true,
       schedule_id: true,
-      wakeup_time: true
+      wakeup_time: true,
+      user_id: true
     }
-  });
-};
-// 자동 알람의 scheduleID 조회
-export const findScheduleDueNow = async (ATalarms) => {
-  return prisma.schedules.findMany({
-    where: {
-      schedule_id: ATalarms.schedule_id,
-    },
   });
 };
 
@@ -149,12 +142,15 @@ export const findAutoAlarmsTomorrow = async (userId) => {
   const tomorrowStartUTC = new Date(tomorrowKST.getTime() - 9 * 60 * 60000);
   const tomorrowEndUTC = new Date(tomorrowStartUTC.getTime() + 24 * 60 * 60 * 1000);
 
+  console.log(tomorrowStartUTC);
+  console.log(tomorrowEndUTC);
+
   return await prisma.$queryRaw`
-    SELECT at.*, s.user_id
+    SELECT at.*
     FROM auto_alarms at
-    JOIN schedules s ON at.schedule_id = s.schedule_id
     WHERE at.wakeup_time >= ${tomorrowStartUTC}
       AND at.wakeup_time < ${tomorrowEndUTC}
       AND at.is_active = true
+      AND at.user_id = ${userId}
   `;
 };
