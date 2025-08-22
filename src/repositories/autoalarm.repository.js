@@ -1,3 +1,4 @@
+import { Tenant } from 'firebase-admin/auth';
 import { prisma } from '../db.config.js';
 import { fetchGoogleDailySchedule_alarm } from '../services/google-calendar.service.js';
 
@@ -188,24 +189,37 @@ export const findAutoAlarmById = async (ATalarmId) => {
 
 // 자동 알람 조회
 export const getAutoAlarmInDB = async (user_id) => {
+  // 지금 시간 (UTC)
   const now = new Date();
 
-  // 한국 시간(KST)으로 변환
-  const nowKST = new Date(now.getTime());
+  // 오늘 0시 ~ 24시 (KST)
+  const todayKST = new Date(now.getTime() + 60 * 1000);
+  todayKST.setHours(0, 0, 0, 0);
 
-  let startKST = new Date(nowKST);
-  let endKST = new Date(nowKST);
+  // 내일 0시 ~ 24시 (KST)
+  const tomorrowKST = new Date(now.getTime() + 60 * 1000);
+  tomorrowKST.setHours(0, 0, 0, 0);
 
-  if (nowKST.getHours() < 12) {
+  // UTC 변환
+  const todayStartUTC = new Date(todayKST.getTime() - 9 * 60 * 60000);
+  const todayEndUTC = new Date(todayStartUTC.getTime() + 24 * 60 * 60 * 1000);
+  const tomorrowStartUTC = new Date(tomorrowKST.getTime() - 9 * 60 * 60000);
+  const tomorrowEndUTC = new Date(tomorrowStartUTC.getTime() + 24 * 60 * 60 * 1000);
+  
+
+  console.log('오늘 시작 : ', todayStartUTC);
+  console.log('오늘 끝 : ', todayEndUTC);
+  console.log('내일 시작 : ', tomorrowStartUTC);
+  console.log('내일 끝 : ', tomorrowEndUTC);
+
+  if (now.getHours() < 3) {
     // 정오 이전 → 오늘 00:00 ~ 11:59:59
-    startKST.setHours(0, 0, 0, 0);
-    endKST.setHours(11, 59, 59, 999);
+    const Tstart = todayStartUTC;
+    const Tend = todayEndUTC;
   } else {
     // 정오 이후 → 내일 00:00 ~ 23:59:59
-    startKST.setDate(startKST.getDate() + 1);
-    startKST.setHours(0, 0, 0, 0);
-    endKST = new Date(startKST);
-    endKST.setHours(23, 59, 59, 999);
+    const Tstart = tomorrowStartUTC;
+    const Tend = tomorrowEndUTC;
   }
 
   // UTC로 변환 (DB 저장 기준)
@@ -213,8 +227,8 @@ export const getAutoAlarmInDB = async (user_id) => {
     where: {
       user_id: user_id,
       wakeup_time: {
-        gte: startKST,
-        lte: endKST,
+        gte: Tstart,
+        lte: Tend,
       },
     },
     orderBy: {
