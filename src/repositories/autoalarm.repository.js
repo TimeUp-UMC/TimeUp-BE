@@ -196,7 +196,7 @@ export const getAutoAlarmInDB = async (user_id) => {
   let startKST = new Date(nowKST);
   let endKST = new Date(nowKST);
 
-  if (nowKST.getHours() < 12) {
+  if (nowKST.getHours() < 3) {
     // 정오 이전 → 오늘 00:00 ~ 11:59:59
     startKST.setHours(0, 0, 0, 0);
     endKST.setHours(11, 59, 59, 999);
