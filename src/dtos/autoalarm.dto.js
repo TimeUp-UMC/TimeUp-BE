@@ -1,3 +1,4 @@
+
 // 자동 알람 수정
 export const updateAutoAlarmDTO = (ATalarmId, body) => {
   const {
@@ -63,25 +64,26 @@ export const getMPAutoAlarmDTO = (AutoAlarm, ATalarmId) => {
         : '',
     };
 
-    return {
-      token, 
+
+
+  return {
+    token,
+    notification: {
+      title: '기상 알람',
+      body: '알람 해제',
+    },
+    android: {
       notification: {
-        title: '기상 알람',
-        body: '알람 해제',
+        sound: 'default',
       },
-      android: {
-        notification: {
+    },
+    apns: {
+      payload: {
+        aps: {
           sound: 'default',
         },
       },
-      apns: {
-        payload: {
-          aps: {
-            sound: 'default',
-          },
-        },
-      },
-      data: rawData
-    };
+    },
+    data: rawData,
   };
-
+};
