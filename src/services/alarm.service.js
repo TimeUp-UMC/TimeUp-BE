@@ -1,5 +1,5 @@
 import { updatedPushTokenInDB } from "../repositories/alarm.repository.js";
-import { findWakeUpAlarmsDueNow, findAutoAlarmsDueNow, findMyAlarmsDueNow, findScheduleAlarmsDueNow, findUsersDueNow, findAutoAlarmsTomorrow, findScheduleDueNow } from "../repositories/alarm.repository.js";
+import { findWakeUpAlarmsDueNow, findAutoAlarmsDueNow, findMyAlarmsDueNow, findScheduleAlarmsDueNow, findUsersDueNow, findAutoAlarmsTomorrow } from "../repositories/alarm.repository.js";
 import { pushWakeUpAlarmDTO } from "../dtos/wakeupalarm.dto.js";
 import { pushAutoAlarmDTO } from "../dtos/autoalarm.dto.js";
 import { pushMyAlarmDTO } from "../dtos/myalarm.dto.js";
@@ -35,25 +35,22 @@ export const sendDueWakeUpAlarms = async () => {
 // 자동 알람
 export const sendDueAutoAlarms = async () => {
     const alarms = await findAutoAlarmsDueNow();
-    for (const alarm of alarms) {
-        const scheduleIds = await findScheduleDueNow(alarm);
-
-        await Promise.all(
-            scheduleIds.map(async (scheduleId) => {
-              const user = await prisma.users.findUnique({
-                where: { user_id: scheduleId.user_id },
-                select: { push_token: true },
-              });
-              if (user?.push_token) {
-                const token = user.push_token;
-                const dto = pushAutoAlarmDTO(alarm, token);
-                console.log(`[auto]:`, dto);
-                await sendPushWUNotification(token, dto);
-              }
-            })
-          );
-    }
-};
+        
+    await Promise.all(
+        alarms.map(async (alarm) => {
+          const user = await prisma.users.findUnique({
+            where: { user_id: alarm.user_id },
+            select: { push_token: true },
+          });
+          if (user?.push_token) {
+            const token = user.push_token;
+            const dto = pushAutoAlarmDTO(alarm, token);
+            console.log(`[Auto]:`, dto);
+            await sendPushWUNotification(token, dto); // 기상 알람과 동일
+          }
+        })
+      );
+    };
 
 // 내 알람
 export const sendDueMyAlarms = async () => {
