@@ -222,6 +222,8 @@ export const getAutoAlarmInDB = async (user_id) => {
     Tend = tomorrowEndUTC;
   }
 
+  
+
   return prisma.auto_alarms.findMany({
     where: {
       user_id: user_id,
