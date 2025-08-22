@@ -1,15 +1,11 @@
 import { NotFoundError } from '../errors/error.js';
 import {
-  createAutoAlarmDTO,
   updateAutoAlarmDTO,
   activeAutoAlarmDTO,
   getMPAutoAlarmDTO,
 } from '../dtos/autoalarm.dto.js';
 import { addAutoAlarmService } from '../services/autoalarm.service.js';
-import {
-  findAutoDataById,
-  findAutoAlarmById,
-} from '../repositories/autoalarm.repository.js';
+import { findAutoAlarmById } from '../repositories/autoalarm.repository.js';
 import { updatedAutoAlarmService } from '../services/autoalarm.service.js';
 import { StatusCodes } from 'http-status-codes';
 import { prisma } from '../db.config.js';
@@ -20,8 +16,6 @@ export const addAutoAlarm = async (req, res, next) => {
     // 토큰 확인 및 user_id
     const userId = req.user?.user_id;
 
-    console.log('user_id:', userId);
-
     // token_id로 사용자 정보 조회
     const exsitingUser = await prisma.users.findUnique({
       where: { user_id: userId },
@@ -31,7 +25,7 @@ export const addAutoAlarm = async (req, res, next) => {
       throw new NotFoundError('사용자가 없습니다.');
     }
     // DTO 생성
-    const dto = createAutoAlarmDTO(userId, req.body);
+    //const dto = createAutoAlarmDTO(userId, req.body);
 
     // 서비스 호출
     const newAutoAlarm = await addAutoAlarmService({ userId });
@@ -47,7 +41,7 @@ export const updateAutoAlarm = async (req, res, next) => {
   try {
     // url에서 auto_alarm_id
     const ATalarmId = parseInt(req.params.auto_alarm_id);
-    console.log('auto_alarm_id:', ATalarmId);
+    //console.log('auto_alarm_id:', ATalarmId);
 
     const existingAutoAlarm = await findAutoAlarmById(ATalarmId);
     if (!existingAutoAlarm)

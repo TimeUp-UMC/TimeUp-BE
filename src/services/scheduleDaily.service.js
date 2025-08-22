@@ -14,6 +14,8 @@ const ENABLE_DEBUG = false;
 const minD = (a, b) => (a.isBefore(b) ? a : b);
 const maxD = (a, b) => (a.isAfter(b) ? a : b);
 
+const formatKST = (d) => dayjs(d).tz(TZ).format('YYYY-MM-DDTHH:mm:ss');
+
 // ISO(UTC)로 반환하되, '발생 일자(KST)의 시분초'를 원본 시분초로 맞춤
 const buildOccurrenceUTC = (baseDate, targetDayKST /* dayjs */) => {
   const base = dayjs(baseDate).tz(TZ);
@@ -23,7 +25,7 @@ const buildOccurrenceUTC = (baseDate, targetDayKST /* dayjs */) => {
     .minute(base.minute())
     .second(base.second())
     .millisecond(base.millisecond());
-  return kst.utc().toDate();
+  return kst.format('YYYY-MM-DDTHH:mm:ss');
 };
 
 // weekly/count: 첫 유효 발생(= start 이후 첫 요일 일치)
@@ -83,8 +85,8 @@ export const getDailySchedule = async (userId, date) => {
         out.push({
           scheduleId: row.schedule_id,
           name: row.name,
-          start_date: row.start_date, // 원본 유지
-          end_date: row.end_date,     // 원본 유지
+          start_date: formatKST(row.start_date),
+          end_date: formatKST(row.end_date),
           color: row.color,
         });
       }
@@ -159,13 +161,17 @@ export const getDailySchedule = async (userId, date) => {
       if (dayStart.isBefore(start, 'day')) return;
       if (until && !dayStart.isBefore(until, 'day')) return;
 
+      const opt = rr.monthly_repeat_option;
+      const isByDayOfMonth = opt === 'by_day_of_month' || opt === 'day_of_month';
+      const isByNthWeekday = opt === 'by_nth_weekday' || opt === 'nth_weekday';
+
       // 이번 달 후보
       let candidate = null;
-      if (rr.monthly_repeat_option === 'by_day_of_month' && rr.day_of_month) {
+      if (isByDayOfMonth && rr.day_of_month) {
         const d = getDayOfMonth(year, month, rr.day_of_month);
         candidate = d ? dayjs(d).tz(TZ).startOf('day') : null;
       } else if (
-        rr.monthly_repeat_option === 'by_nth_weekday' &&
+        isByNthWeekday &&
         rr.nth_week &&
         (rr.weekday !== null && rr.weekday !== undefined)
       ) {
@@ -182,9 +188,10 @@ export const getDailySchedule = async (userId, date) => {
           let m = start.month() + 1;
           for (let i = 0; i < 36; i++) {
             let dd = null;
-            if (rr.monthly_repeat_option === 'by_day_of_month' && rr.day_of_month) {
+            if (isByDayOfMonth && rr.day_of_month) {
               dd = getDayOfMonth(y, m, rr.day_of_month);
             } else if (
+              isByNthWeekday &&
               rr.nth_week &&
               (rr.weekday !== null && rr.weekday !== undefined)
             ) {
@@ -241,8 +248,8 @@ export const getDailySchedule = async (userId, date) => {
           out.push({
             scheduleId: row.schedule_id,
             name: row.name,
-            start_date: row.start_date,
-            end_date: row.end_date,
+            start_date: formatKST(row.start_date),
+            end_date: formatKST(row.end_date),
             color: row.color,
           });
         }

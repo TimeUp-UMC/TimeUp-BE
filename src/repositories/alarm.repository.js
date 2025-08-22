@@ -45,6 +45,7 @@ export const findAutoAlarmsDueNow = async () => {
         lt: oneMinuteLater,
       },
     },
+
     select: {
       auto_alarm_id: true,
       schedule_id: true,

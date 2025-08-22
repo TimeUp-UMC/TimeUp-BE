@@ -4,6 +4,17 @@ import {
   findRecurrenceRuleByScheduleId,
   findRepeatWeekdaysByRecurrenceId,
 } from '../repositories/scheduleDetail.repository.js';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const formatKST = (date) => {
+  if (!date) return null;
+  return dayjs(date).tz('Asia/Seoul').format('YYYY-MM-DDTHH:mm:ss');
+};
 
 export const getScheduleDetailByScheduleId = async (scheduleId) => {
   const baseSchedule = await findScheduleById(scheduleId);
@@ -21,14 +32,14 @@ export const getScheduleDetailByScheduleId = async (scheduleId) => {
     scheduleId: baseSchedule.schedule_id,
     user_id: baseSchedule.user_id,
     name: baseSchedule.name,
-    start_date: baseSchedule.start_date,
-    end_date: baseSchedule.end_date,
+    start_date: formatKST(baseSchedule.start_date),
+    end_date: formatKST(baseSchedule.end_date), 
     color: baseSchedule.color,
     place_name: baseSchedule.place_name,
     address: baseSchedule.address,
     is_important: baseSchedule.is_important,
     is_reminding: baseSchedule.is_reminding,
-    reminder_at: remindRule?.remind_at ?? null,
+    remind_at: remindRule?.remind_at ?? null,
     is_recurring: baseSchedule.is_recurring,
     recurrence_rule: recurrence_rule
       ? {

@@ -1,7 +1,8 @@
 import { prisma } from '../db.config.js';
 import { fetchGoogleDailySchedule_alarm } from '../services/google-calendar.service.js';
 
-export const findAutoDataById = async (userId) => {
+export const findAutoDataById = async (userObj) => {
+  const userId = userObj.userId;
   const now = new Date();
   // KST 기준 내일 00:00:00
   const DateKST = new Date(now.getTime() + 9 * 60 * 60 * 1000);
@@ -18,8 +19,11 @@ export const findAutoDataById = async (userId) => {
   );
 
   // 유저 기본 정보
+
+  console.log('userId:', userId);
+
   const user = await prisma.users.findUnique({
-    where: { user_id: userId },
+    where: { user_id: Number(userId) },
     select: {
       avg_ready_time: true,
       home_address: true,
@@ -50,26 +54,21 @@ export const findAutoDataById = async (userId) => {
       address: true,
     },
   });
+
   // 구글 캘린더 스케줄
-  const yyyyMmDd = tomorrowStart.toISOString().split('T')[0]; // YYYY-MM-DD
+  const yyyyMmDd = dbtomorrowStart.toISOString().split('T')[0]; // YYYY-MM-DD
   const googleSchedules = await fetchGoogleDailySchedule_alarm(
     userId,
     yyyyMmDd
   );
 
-  // 내일 범위에 속하는 구글 일정만 필터
-  const tomorrowSchedules = googleSchedules.filter((s) => {
-    const startDate = new Date(s.start_date);
-    return startDate >= dbtomorrowStart && startDate <= dbtomorrowEnd;
-  });
-
   // 가장 빠른 일정 하나만 선택
   let googleSchedule = null;
-  if (tomorrowSchedules.length > 0) {
-    tomorrowSchedules.sort(
+  if (googleSchedules.length > 0) {
+    googleSchedules.sort(
       (a, b) => new Date(a.start_date) - new Date(b.start_date)
     );
-    googleSchedule = tomorrowSchedules[0];
+    googleSchedule = googleSchedules[0];
   }
 
   // DB vs Google 중 더 빠른 일정 선택
@@ -134,12 +133,39 @@ export const findAutoDataById = async (userId) => {
 };
 
 // 자동 알람 등록
-export async function createAutoAlarmInDB(dto) {
+export async function createAutoAlarmInDB(user_id, dto) {
+  // 동일한 유저 + 동일한 wakeup_time 있는지 확인
+  // 분 단위로 동일 여부 체크
+  const alarmTime = new Date(dto.wakeup_time);
+  alarmTime.setSeconds(0, 0); // 초, 밀리초 제거
+  const startMinute = new Date(alarmTime.getTime() - 1 * 60 * 1000); // 1분 전
+  const endMinute = new Date(alarmTime.getTime() + 1 * 60 * 1000); // 1분 뒤
+
+  const existingAlarm = await prisma.auto_alarms.findFirst({
+    where: {
+      user_id: dto.user_id,
+      wakeup_time: {
+        gte: startMinute,
+        lt: endMinute,
+      },
+    },
+  });
+
+  if (existingAlarm) {
+    console.log(
+      `이미 존재하는 자동알람 : user_id=${dto.user_id}, wakeup_time=${dto.wakeup_time}`
+    );
+    return existingAlarm; // 기존 알람 리턴 (새로 추가 안 함)
+  }
+
+  console.log('auto alarm create : ');
+  console.log(dto);
   return await prisma.auto_alarms.create({
     data: {
-      schedule_id: isNaN(Number(dto.schedule_id)) ? 0 : Number(dto.schedule_id),
+      user_id: dto.user_id,
+      schedule_id: typeof dto.schedule_id === 'string' ? 0 : dto.schedule_id,
       wakeup_time: dto.wakeup_time,
-      sound_id: dto.sound_id || 1, // 기본값 지정
+      sound_id: dto.sound_id,
       created_at: dto.created_at,
     },
   });
@@ -161,45 +187,34 @@ export const findAutoAlarmById = async (ATalarmId) => {
 };
 
 // 자동 알람 조회
-export const getscheduleInDB = async (userId) => {
-  const schedules = await prisma.schedules.findMany({
-    where: { user_id: userId },
-    select: { schedule_id: true },
-  });
-  return schedules;
-};
-// export const getAutoAlarmInDB = async (scheduleId) => {
-//   const autoAlarms = await prisma.auto_alarms.findMany({
-//     where: { schedule_id: { in: scheduleId } },
-//   });
-//   const sortedAlarms = await prisma.auto_alarms.findMany({
-//     orderBy: { wakeup_time: 'asc' },
-//   });
-//   return sortedAlarms;
-// };
-
-export const getAutoAlarmInDB = async (scheduleId) => {
+export const getAutoAlarmInDB = async (user_id) => {
   const now = new Date();
-  // KST 기준 내일 00:00:00
-  const DateKST = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  const tomorrowStartKST = new Date(DateKST);
-  tomorrowStartKST.setDate(DateKST.getDate() + 1);
-  tomorrowStartKST.setHours(12, 0, 0, 0);
 
-  // UTC 변환 (DB 저장용)
-  const dbtomorrowStart = new Date(
-    tomorrowStartKST.getTime() - 9 * 60 * 60 * 1000
-  );
-  const dbtomorrowEnd = new Date(
-    tomorrowStartKST.getTime() + 24 * 60 * 60 * 1000 - 1
-  );
+  // 한국 시간(KST)으로 변환
+  const nowKST = new Date(now.getTime());
+
+  let startKST = new Date(nowKST);
+  let endKST = new Date(nowKST);
+
+  if (nowKST.getHours() < 12) {
+    // 정오 이전 → 오늘 00:00 ~ 11:59:59
+    startKST.setHours(0, 0, 0, 0);
+    endKST.setHours(11, 59, 59, 999);
+  } else {
+    // 정오 이후 → 내일 00:00 ~ 23:59:59
+    startKST.setDate(startKST.getDate() + 1);
+    startKST.setHours(0, 0, 0, 0);
+    endKST = new Date(startKST);
+    endKST.setHours(23, 59, 59, 999);
+  }
+
+  // UTC로 변환 (DB 저장 기준)
   return prisma.auto_alarms.findMany({
     where: {
-      schedule_id: { in: scheduleId },
+      user_id: user_id,
       wakeup_time: {
-        gte: dbtomorrowStart,
-
-        lte: dbtomorrowEnd,
+        gte: startKST,
+        lte: endKST,
       },
     },
     orderBy: {
@@ -207,4 +222,3 @@ export const getAutoAlarmInDB = async (scheduleId) => {
     },
   });
 };
-
