@@ -35,7 +35,7 @@ export const activeAutoAlarmDTO = (ATalarmId, currentState) => {
 export const getAutoAlarmDTO = (AutoAlarm) => {
   // KST로 변환
   // const date = new Date(AutoAlarm.wakeup_time + 9);
-  const date = new Date(AutoAlarm.wakeup_time + 9 * 60 * 60 * 1000);
+  const date = new Date(AutoAlarm.wakeup_time.getTime() + 9 * 60 * 60 * 1000);
 
   return {
     user_id: AutoAlarm.user_id,
